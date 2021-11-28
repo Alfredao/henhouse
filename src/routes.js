@@ -3,6 +3,7 @@ import Market from "./views/Market.js";
 import Inventory from "./views/Inventory";
 import Chicken from "./views/Chicken";
 import House from "./views/House";
+import FAQ from "./views/FAQ";
 
 const dashboardRoutes = [
     {
@@ -38,6 +39,13 @@ const dashboardRoutes = [
         name: "Mercado",
         icon: "fas fa-hand-holding-usd",
         component: Market,
+        layout: "/game",
+    },
+    {
+        path: "/faq",
+        name: "FAQ",
+        icon: "fas fa-question",
+        component: FAQ,
         layout: "/game",
     },
 ];

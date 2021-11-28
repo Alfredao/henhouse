@@ -1,8 +1,9 @@
 {
   "name": "henhousecrypto-client",
-  "version": "2.0.0",
+  "version": "0.0.1",
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.2",
+    "@walletconnect/web3-provider": "^1.6.6",
     "bootstrap": "4.6.0",
     "chartist": "0.10.1",
     "gulp": "4.0.2",
@@ -17,7 +18,8 @@
     "react-router": "5.2.0",
     "react-router-dom": "5.2.0",
     "react-scripts": "4.0.1",
-    "web3": "^1.6.1"
+    "web3": "^1.6.1",
+    "web3modal": "^1.9.4"
   },
   "optionalDependencies": {
     "jquery": "3.5.1",

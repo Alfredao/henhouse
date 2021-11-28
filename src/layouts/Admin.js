@@ -7,7 +7,6 @@ import Sidebar from "components/Sidebar/Sidebar";
 
 import routes from 'routes.js';
 
-
 function Admin() {
     const location = useLocation();
     const mainPanel = React.useRef(null);
