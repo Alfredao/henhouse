@@ -2,7 +2,7 @@ import React from "react";
 
 import {Card, Col, Container, Row,} from "react-bootstrap";
 
-function Chicken() {
+function FAQ() {
     return (
         <>
             <Container fluid>
@@ -10,11 +10,14 @@ function Chicken() {
                     <Col md="12">
                         <Card className="striped-tabled-with-hover">
                             <Card.Header>
-                                <Card.Title as="h4">Minhas galinhas</Card.Title>
+                                <Card.Title as="h4">FAQ</Card.Title>
                                 <p className="card-category">
-                                    Aqui as minhas galinhas
+                                    Perguntas mais respondidas
                                 </p>
                             </Card.Header>
+                            <Card.Body>
+
+                            </Card.Body>
                         </Card>
                     </Col>
                 </Row>
@@ -23,4 +26,4 @@ function Chicken() {
     );
 }
 
-export default Chicken;
+export default FAQ;
