@@ -1,6 +1,8 @@
 import create from "zustand"
 
 export const walletState = create(set => ({
+    provider: undefined,
+    web3: undefined,
     balances: {},
     selectedAccount: undefined,
     network: undefined,
@@ -9,6 +11,8 @@ export const walletState = create(set => ({
         this.balances = {};
         this.selectedAccount = undefined;
         this.network = undefined;
+        this.web3 = undefined;
+        this.provider = undefined;
         this.secureProtocolError = false;
     }
 }));

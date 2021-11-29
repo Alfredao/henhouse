@@ -3,19 +3,13 @@ import Web3 from "web3";
 import Web3Modal from "web3modal";
 import * as evmChains from "evm-chains";
 import {Button} from "reactstrap";
-import {walletState} from "./walletState";
-import contractAbi from "../../contracts/HenHouseAbi.json";
+import {walletState} from "../../states/walletState";
 
-let provider;
 let web3Modal;
 
 function Wallet() {
 
     let selectedAccount = walletState(state => state.selectedAccount);
-
-    const clearAccountData = () => {
-        walletState(state => state.clearAccountData);
-    }
 
     /**
      * Setup the orchestra
@@ -48,29 +42,53 @@ function Wallet() {
     const onConnect = async () => {
 
         try {
-            provider = await web3Modal.connect();
+            let provider = await web3Modal.connect();
+
+            // Subscribe to accounts change
+            provider.on("accountsChanged", (accounts) => {
+                fetchAccountData(provider);
+            });
+
+            // Subscribe to chainId change
+            provider.on("chainChanged", (chainId) => {
+                fetchAccountData(provider);
+            });
+
+            // Subscribe to networkId change
+            provider.on("networkChanged", (networkId) => {
+                fetchAccountData(provider);
+            });
+
+            await refreshAccountData(provider);
+
+            walletState.setState({provider: provider});
         } catch (e) {
-            return;
+            console.log(e);
         }
-
-        // Subscribe to accounts change
-        provider.on("accountsChanged", (accounts) => {
-            fetchAccountData();
-        });
-
-        // Subscribe to chainId change
-        provider.on("chainChanged", (chainId) => {
-            fetchAccountData();
-        });
-
-        // Subscribe to networkId change
-        provider.on("networkChanged", (networkId) => {
-            fetchAccountData();
-        });
-
-        await refreshAccountData();
     }
 
+    /**
+     * Disconnect wallet button pressed.
+     */
+    const onDisconnect = async () => {
+
+        let provider = walletState(state => state.provider);
+
+        // TODO: Which providers have close method?
+        if (provider?.close) {
+            await provider.close();
+
+            // If the cached provider is not cleared,
+            // WalletConnect will default to the existing session
+            // and does not allow to re-scan the QR code with a new wallet.
+            // Depending on your use case you may want or want not his behavir.
+            await web3Modal.clearCachedProvider();
+
+            walletState.setState({provider: undefined});
+        }
+
+        clearAccountData();
+    }
 
     /**
      * Fetch account data for UI when
@@ -78,7 +96,7 @@ function Wallet() {
      * - User switches networks in wallet
      * - User connects wallet initially
      */
-    const refreshAccountData = async () => {
+    const refreshAccountData = async (provider) => {
 
         // If any current data is displayed when
         // the user is switching acounts in the wallet
@@ -99,7 +117,7 @@ function Wallet() {
     /**
      * Kick in the UI action after Web3modal dialog has chosen a provider
      */
-    const fetchAccountData = async () => {
+    const fetchAccountData = async (provider) => {
 
         // Get a Web3 instance for the wallet
         const web3 = new Web3(provider);
@@ -140,25 +158,8 @@ function Wallet() {
         await Promise.all(rowResolvers);
     }
 
-
-    /**
-     * Disconnect wallet button pressed.
-     */
-    const onDisconnect = async () => {
-
-        // TODO: Which providers have close method?
-        if (provider?.close) {
-            await provider.close();
-
-            // If the cached provider is not cleared,
-            // WalletConnect will default to the existing session
-            // and does not allow to re-scan the QR code with a new wallet.
-            // Depending on your use case you may want or want not his behavir.
-            await web3Modal.clearCachedProvider();
-            provider = null;
-        }
-
-        clearAccountData();
+    const clearAccountData = () => {
+        walletState(state => state.clearAccountData)
     }
 
     useEffect(init);
