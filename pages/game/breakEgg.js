@@ -2,17 +2,21 @@ import React from "react";
 import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
-import {walletState} from "../../components/Wallet/walletState";
-
-import contractAbi from "../../contracts/HenHouseAbi.json";
+import {walletState} from "../../states/walletState";
+import Web3 from "web3";
 
 const BreakEgg = (props) => {
 
-    let selectedAccount = walletState(state => state.selectedAccount);
+    const {provider} = walletState();
 
-    function breakEgg() {
+    const breakEgg = async function () {
+        const web3 = new Web3(provider);
 
-    }
+        // Get connected chain id from Ethereum node
+        const chainId = await web3.eth.getChainId();
+
+        console.log(chainId);
+    };
 
     return (
         <>
@@ -36,9 +40,9 @@ const BreakEgg = (props) => {
                                             <div className="jumbotron">
                                                 <h1>Consiga uma galinha agora</h1>
                                                 <h4>Quebre um ovo e boa sorte</h4>
-                                                <img style={{height: '400px', width: '100%', display: 'block'}} src="/eggnest.jpg"/>
+                                                <img style={{height: '400px', width: '100%', display: 'block'}} src="/img/breakegg.jpg"/>
                                                 <p className="lead">Pague apenas 1 HEN e receba uma galinha com atributos aleatórios</p>
-                                                <Button className="btn-lg btn-block" onClick={breakEgg}>ATIVAR HEN</Button>
+                                                <Button className="btn-lg btn-block" onClick={breakEgg}>AUTORIZAR CARTEIRA</Button>
                                             </div>
                                         </div>
                                     </Row>

@@ -12,15 +12,21 @@ const routes = [
         layout: "/game",
     },
     {
-        path: "/chicken",
+        path: "/hens",
         name: "Minhas galinhas",
         icon: "fas fa-crow",
         layout: "/game",
     },
     {
-        path: "/house",
-        name: "Galinheiro",
+        path: "/houses",
+        name: "Galinheiros",
         icon: "fas fa-warehouse",
+        layout: "/game",
+    },
+    {
+        path: "/pvp",
+        name: "Rinhas",
+        icon: "fas fa-skull-crossbones",
         layout: "/game",
     },
     {

@@ -1,14 +1,13 @@
 import React from "react";
-import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
+import {Card, CardBody, CardHeader, Col, Container, Media, Row, } from "reactstrap";
 import Game from "layouts/Game";
-import Header from "components/Headers/Header.js";
+import Header from "components/Headers/Header";
 import {Alert} from "react-bootstrap";
 
-const Inventory = (props) => {
+const Dashboard = (props) => {
     return (
         <>
             <Header/>
-            {/* Page content */}
             <Container className="mt--7" fluid>
                 <Row className="mt-5">
                     <Col className="mb-5 mb-xl-0" xl="12">
@@ -16,7 +15,7 @@ const Inventory = (props) => {
                             <CardHeader className="border-0">
                                 <Row className="align-items-center">
                                     <div className="col">
-                                        <h3 className="mb-0">Meus itens</h3>
+                                        <h3 className="mb-0">Rinha de galos (Arena PvP)</h3>
                                     </div>
                                 </Row>
                             </CardHeader>
@@ -27,6 +26,7 @@ const Inventory = (props) => {
                                         Sistema em construção
                                     </p>
                                 </Alert>
+                                <img src={"/img/fight.jpg"} alt={"rinha"} width={"100%"}/>
                             </CardBody>
                         </Card>
                     </Col>
@@ -36,6 +36,6 @@ const Inventory = (props) => {
     );
 };
 
-Inventory.layout = Game;
+Dashboard.layout = Game;
 
-export default Inventory;
+export default Dashboard;

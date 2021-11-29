@@ -5,17 +5,9 @@ import App from "next/app";
 import "assets/plugins/nucleo/css/nucleo.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "assets/scss/nextjs-argon-dashboard.scss";
+import "assets/css/global.css";
 
 export default class MyApp extends App {
-    componentDidMount() {
-        let comment = document.createComment(`
-=========================================================
-BISGO SOLUTIONS
-=========================================================
-`);
-        document.insertBefore(comment, document.documentElement);
-    }
-
     static async getInitialProps({Component, router, ctx}) {
         let pageProps = {};
 

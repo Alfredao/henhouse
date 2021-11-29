@@ -13,7 +13,7 @@ services:
     image: node:alpine
     container_name: henhouse-node
     volumes:
-      - .:/src
+      - .:/home/node/app
     ports:
       - "3001:3000"
-    command: "npm start"
+    command: "cd /home/node/app && npm start"

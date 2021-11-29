@@ -8,15 +8,15 @@ const Market = (props) => {
     let galinhas = [
         {
             name: 'GALINHA PRETA',
-            image: '/hen/black.jpg',
+            image: '/img/hen/black.jpg',
         },
         {
             name: 'GALINHA DE GRANJA',
-            image: '/hen/white.jpg',
+            image: '/img/hen/white.jpg',
         },
         {
             name: 'GALINHA CAIPIRA',
-            image: '/hen/brown.jpg',
+            image: '/img/hen/brown.jpg',
         },
     ];
 

@@ -1,10 +1,9 @@
 import React from "react";
-import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
+import {Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
-import {Alert} from "react-bootstrap";
 
-const Inventory = (props) => {
+const Houses = (props) => {
     return (
         <>
             <Header/>
@@ -16,17 +15,12 @@ const Inventory = (props) => {
                             <CardHeader className="border-0">
                                 <Row className="align-items-center">
                                     <div className="col">
-                                        <h3 className="mb-0">Meus itens</h3>
+                                        <h3 className="mb-0">Galinheiros</h3>
                                     </div>
                                 </Row>
                             </CardHeader>
                             <CardBody>
-                                <Alert variant="default">
-                                    <Alert.Heading>Em breve</Alert.Heading>
-                                    <p>
-                                        Sistema em construção
-                                    </p>
-                                </Alert>
+
                             </CardBody>
                         </Card>
                     </Col>
@@ -36,6 +30,6 @@ const Inventory = (props) => {
     );
 };
 
-Inventory.layout = Game;
+Houses.layout = Game;
 
-export default Inventory;
+export default Houses;
