@@ -6,7 +6,7 @@ import AdminFooter from "components/Footers/AdminFooter";
 import Sidebar from "components/Sidebar/Sidebar";
 import routes from "routes";
 
-function Admin(props) {
+function Game(props) {
     // used for checking current route
     const router = useRouter();
     let mainContentRef = React.createRef();
@@ -40,4 +40,4 @@ function Admin(props) {
     );
 }
 
-export default Admin;
+export default Game;

@@ -1,13 +1,7 @@
 import React from "react";
-// node.js library that concatenates classes (strings)
-import classnames from "classnames";
-// reactstrap components
-import {Button, Card, CardBody, CardHeader, Col, Container, Nav, NavItem, NavLink, Progress, Row, Table,} from "reactstrap";
-// layout for this page
-import Admin from "layouts/Admin.js";
-// core components
-
-import Header from "components/Headers/Header.js";
+import {Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
+import Game from "layouts/Game";
+import Header from "components/Headers/Header";
 
 const Dashboard = (props) => {
 
@@ -36,6 +30,6 @@ const Dashboard = (props) => {
     );
 };
 
-Dashboard.layout = Admin;
+Dashboard.layout = Game;
 
 export default Dashboard;

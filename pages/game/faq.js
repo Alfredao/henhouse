@@ -1,6 +1,6 @@
 import React from "react";
 import {Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
-import Admin from "layouts/Admin.js";
+import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 
 const Faq = (props) => {
@@ -29,6 +29,6 @@ const Faq = (props) => {
     );
 };
 
-Faq.layout = Admin;
+Faq.layout = Game;
 
 export default Faq;

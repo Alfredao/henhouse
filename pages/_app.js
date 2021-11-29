@@ -28,7 +28,6 @@ BISGO SOLUTIONS
 
     render() {
         const {Component, pageProps} = this.props;
-
         const Layout = Component.layout || (({children}) => <>{children}</>);
 
         return (

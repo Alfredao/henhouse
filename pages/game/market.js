@@ -1,22 +1,22 @@
 import React from "react";
 import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
-import Admin from "layouts/Admin.js";
+import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 
 const Market = (props) => {
 
     let galinhas = [
         {
-            name : 'GALINHA PRETA',
-            image : '/hen/black.jpg',
+            name: 'GALINHA PRETA',
+            image: '/hen/black.jpg',
         },
         {
-            name : 'GALINHA DE GRANJA',
-            image : '/hen/white.jpg',
+            name: 'GALINHA DE GRANJA',
+            image: '/hen/white.jpg',
         },
         {
-            name : 'GALINHA CAIPIRA',
-            image : '/hen/brown.jpg',
+            name: 'GALINHA CAIPIRA',
+            image: '/hen/brown.jpg',
         },
     ];
 
@@ -43,9 +43,13 @@ const Market = (props) => {
                                                  src={hen.image}
                                                  data-holder-rendered="true"/>
                                             <div className="card-body">
-                                                <h3>{hen.name}</h3>
+                                                <h3>{hen.name} <small className={"text-muted mt-1 float-right"}> Level 1</small></h3>
                                                 <p className="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                                                <p className="card-text">S66/A100/C7/W21/I45/S45</p>
+                                                <hr/>
+                                                <p className="card-text">
+                                                    {["A", "B", "C", "D", "E"].map((attr, i) => <span className={"mr-4"}>{attr} <strong>99</strong></span>)}
+                                                </p>
+                                                <hr/>
                                                 <div className="d-flex justify-content-between align-items-center">
                                                     <div className="btn-group">
                                                         <Button>COMPRAR</Button>
@@ -65,6 +69,6 @@ const Market = (props) => {
     );
 };
 
-Market.layout = Admin;
+Market.layout = Game;
 
 export default Market;

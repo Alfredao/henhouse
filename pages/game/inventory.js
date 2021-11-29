@@ -1,6 +1,6 @@
 import React from "react";
 import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
-import Admin from "layouts/Admin.js";
+import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 
 const Inventory = (props) => {
@@ -44,6 +44,6 @@ const Inventory = (props) => {
     );
 };
 
-Inventory.layout = Admin;
+Inventory.layout = Game;
 
 export default Inventory;
