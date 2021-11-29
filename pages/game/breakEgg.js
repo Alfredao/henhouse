@@ -12,9 +12,6 @@ const BreakEgg = (props) => {
 
     function breakEgg() {
 
-
-
-
     }
 
     return (
