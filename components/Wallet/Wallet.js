@@ -15,14 +15,12 @@ function Wallet() {
      * Setup the orchestra
      */
     const init = () => {
-
         // Check that the web page is run in a secure context,
         // as otherwise MetaMask won't be available
-        // if (window.location.protocol !== 'https:') {
-        //     // https://ethereum.stackexchange.com/a/62217/620
-        //     setSecureProtocolError(true);
-        //     return;
-        // }
+        if (window.location.protocol !== 'https:') {
+            // https://ethereum.stackexchange.com/a/62217/620
+            walletState.setState({secureProtocolError: true});
+        }
 
         // Tell Web3modal what providers we have available.
         // Built-in web browser provider (only one can exist as a time)
@@ -60,8 +58,6 @@ function Wallet() {
             });
 
             await refreshAccountData(provider);
-
-            walletState.setState({provider: provider});
         } catch (e) {
             console.log(e);
         }
@@ -118,6 +114,9 @@ function Wallet() {
      * Kick in the UI action after Web3modal dialog has chosen a provider
      */
     const fetchAccountData = async (provider) => {
+
+        // Save provider to state
+        walletState.setState({provider: provider});
 
         // Get a Web3 instance for the wallet
         const web3 = new Web3(provider);
