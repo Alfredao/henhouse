@@ -393,15 +393,20 @@ const abi = [
 
 const BreakEgg = (props) => {
 
-    const {provider} = walletState();
+    const {provider, selectedAccount} = walletState();
 
     const breakEgg = async function () {
         const web3 = new Web3(provider);
 
-        // Get connected chain id from Ethereum node
-        const chainId = await web3.eth.getChainId();
+        let contract = new web3.eth.Contract(abi, '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9');
 
-        console.log(chainId);
+        contract.methods.approve(
+            selectedAccount,
+            web3.utils.toWei(
+                web3.utils.toBN(2 ** 64 - 1),
+                'ether'
+            )
+        ).send({from: selectedAccount});
     };
 
     return (

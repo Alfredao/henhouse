@@ -1,7 +1,6 @@
 import React, {useEffect} from "react";
 import Web3 from "web3";
 import Web3Modal from "web3modal";
-import * as evmChains from "evm-chains";
 import {Button} from "reactstrap";
 import {walletState} from "../../states/walletState";
 
@@ -123,9 +122,7 @@ function Wallet() {
 
         // Get connected chain id from Ethereum node
         const chainId = await web3.eth.getChainId();
-        // Load chain information over an HTTP API
-        const chainData = evmChains?.getChain(chainId);
-        walletState.setState({network: chainData.name});
+        walletState.setState({network: chainId});
 
         // Get list of accounts of the connected wallet
         const accounts = await web3.eth.getAccounts();

@@ -1,17 +1,7 @@
 {
-  "name": "nextjs-argon-dashboard",
-  "version": "1.1.0",
-  "author": "Creative Tim",
-  "license": "MIT",
-  "homepage": "https://demos.creative-tim.com/nextjs-argon-dashboard/",
-  "description": "NextJS version of Argon Dashboard React by Creative Tim",
-  "bugs": {
-    "url": "https://github.com/creativetimofficial/nextjs-argon-dashboard/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/creativetimofficial/nextjs-argon-dashboard.git"
-  },
+  "name": "henhouse-client",
+  "version": "0.0.1",
+  "description": "Hen House client",
   "scripts": {
     "start": "next start",
     "build": "next build",
@@ -44,7 +34,7 @@
     "path": "0.12.7",
     "react": "17.0.1",
     "react-bootstrap": "^2.0.2",
-    "react-copy-to-clipboard": "5.0.3",
+    "react-copy-to-clipboard": "^5.0.4",
     "react-datetime": "^3.1.1",
     "react-dom": "17.0.1",
     "reactstrap": "8.9.0",
@@ -56,6 +46,8 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0",
     "@openzeppelin/contracts-upgradeable": "^4.4.0",
     "@openzeppelin/hardhat-upgrades": "^1.12.0",
     "@types/node": "^16.11.10",
@@ -64,6 +56,7 @@
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.1",
     "hardhat": "^2.7.0",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "url-loader": "^4.1.1"
   }
 }
