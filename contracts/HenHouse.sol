@@ -17,4 +17,11 @@ contract HenHouse is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
+
+    function spend(address from, uint256 value) public returns (bool)
+    {
+        _burn(from, value);
+
+        return true;
+    }
 }

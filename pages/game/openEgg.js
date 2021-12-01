@@ -5,18 +5,40 @@ import Header from "components/Headers/Header.js";
 import {walletState} from "../../states/walletState";
 import Web3 from "web3";
 
-import henJson from "../../artifacts/contracts/Hen.sol/Hen.json"
+import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
+import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json"
 
 const OpenEgg = (props) => {
 
-    const {provider, selectedAccount} = walletState();
+    const {provider, selectedAccount, balances} = walletState();
     const web3 = new Web3(provider);
 
-    let contract = new web3.eth.Contract(henJson.abi, '0xADe6e248d3Bc169cE8d1E2fd57C9Cf60c068d3d4');
+    let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS);
+    let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
-    const breakEgg = async function () {
+    const mintGovToken = async function () {
+        await token.methods.mint(
+            selectedAccount,
+            web3.utils.toWei('1000', 'ether')
+        ).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
 
-        await contract.methods.safeMint(
+    const setMintToken = async function () {
+        await nft.methods.setHenToken(process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setEggPrice = async function () {
+        await nft.methods.setEggPrice(web3.utils.toWei('1', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const openEgg = async function () {
+        await nft.methods.safeMint(
             selectedAccount,
             "https://my-json-server.typicode.com/abcoathup/samplenft/tokens/0"
         ).send({
@@ -24,8 +46,8 @@ const OpenEgg = (props) => {
         }).then((r) => console.log(r));
     };
 
-    const getUri = async function (id) {
-        await contract.methods.tokenURI(id).call({
+    const getTokenUri = async function (id) {
+        await token.methods.tokenURI(id).call({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -54,7 +76,10 @@ const OpenEgg = (props) => {
                                                 <h4>Quebre um ovo e boa sorte</h4>
                                                 <img style={{height: '400px', width: '100%', display: 'block'}} src="/img/breakegg.jpg" alt={"break-egg"}/>
                                                 <p className="lead">Pague apenas 1 HEN e receba uma galinha com atributos aleatórios</p>
-                                                <Button className="btn-lg btn-block" onClick={breakEgg}>AUTORIZAR CARTEIRA</Button>
+                                                {/*<Button className="btn-lg btn-block" onClick={setMintToken}>Definir moeda de troca</Button>*/}
+                                                {/*<Button className="btn-lg btn-block" onClick={setEggPrice}>Definir preço do ovo</Button>*/}
+                                                <Button className="btn-lg btn-block" onClick={mintGovToken}>Receber tokens</Button>
+                                                <Button className="btn-lg btn-block" onClick={openEgg}>Abrir ovo</Button>
                                             </div>
                                         </div>
                                     </Row>

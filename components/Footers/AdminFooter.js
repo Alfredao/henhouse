@@ -9,10 +9,10 @@ function Footer() {
         <footer className="footer">
             <Nav className="nav-footer justify-content-center">
                 <NavItem className="mr-9">
-                    $HEN Token Address: 0x9999999999999999999999999999999999999999
+                    $HEN Token Address: {process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS}
                 </NavItem>
                 <NavItem>
-                    $EGG Token Address: 0x9999999999999999999999999999999999999999
+                    $EGG Token Address: {process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS}
                 </NavItem>
             </Nav>
         </footer>
