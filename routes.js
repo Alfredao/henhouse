@@ -6,8 +6,8 @@ const routes = [
         layout: "/game",
     },
     {
-        path: "/breakEgg",
-        name: "Quebrar ovo",
+        path: "/openEgg",
+        name: "Abrir ovo",
         icon: "fas fa-egg",
         layout: "/game",
     },
