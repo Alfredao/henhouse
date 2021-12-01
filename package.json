@@ -11,10 +11,13 @@
     "map:scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js assets/scss/nextjs-argon-dashboard.scss assets/css/nextjs-argon-dashboard.css --source-map true",
     "build:scss": "npm run compile:scss && npm run minify:scss && npm run map:scss",
     "dev": "next dev",
-    "compile:contract": "npx hardhat compile"
+    "contract:compile": "npx hardhat compile",
+    "contract:test": "npx hardhat test",
+    "contract:node": "npx hardhat node",
+    "contract:deploy": "npx hardhat run scripts/deploy.js --network localhost",
+    "contract:deploy-testnet": "npx hardhat run scripts/deploy.js --network testnet"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "5.15.2",
     "@types/react-dom": "^17.0.11",
     "@walletconnect/web3-provider": "^1.6.6",
     "@web3-react/injected-connector": "^6.0.7",

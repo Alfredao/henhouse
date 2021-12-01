@@ -7,8 +7,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract HenHouse is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, OwnableUpgradeable {
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {}
 
     function initialize() initializer public {
         __ERC20_init("Hen House", "HEN");

@@ -3,7 +3,6 @@ import Head from "next/head";
 import App from "next/app";
 
 import "assets/plugins/nucleo/css/nucleo.css";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import "assets/scss/nextjs-argon-dashboard.scss";
 import "assets/css/global.css";
 
