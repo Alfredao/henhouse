@@ -155,10 +155,16 @@ function Wallet() {
     }
 
     const clearAccountData = () => {
-        walletState(state => state.clearAccountData)
+        return false;
+
+        // walletState(state => state.clearAccountData);
     }
 
-    useEffect(init);
+    useEffect(async function () {
+        init();
+
+        await onConnect();
+    });
 
     return (
         <>

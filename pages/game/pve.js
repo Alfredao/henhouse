@@ -1,5 +1,5 @@
 import React from "react";
-import {Card, CardBody, CardHeader, Col, Container, Media, Row, } from "reactstrap";
+import {Card, CardBody, CardHeader, Col, Container, Media, Row,} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header";
 import {Alert} from "react-bootstrap";
@@ -15,7 +15,7 @@ const Dashboard = (props) => {
                             <CardHeader className="border-0">
                                 <Row className="align-items-center">
                                     <div className="col">
-                                        <h3 className="mb-0">Rinha de galos (Arena PvP)</h3>
+                                        <h3 className="mb-0">Rinha de galos (Arena PvE)</h3>
                                     </div>
                                 </Row>
                             </CardHeader>

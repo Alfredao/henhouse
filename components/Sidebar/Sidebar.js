@@ -1,4 +1,4 @@
-/*eslint-disable*/
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import React from "react";
 import Link from "next/link";
 import {useRouter} from "next/router";
@@ -31,13 +31,9 @@ function Sidebar(props) {
             return (
                 <NavItem key={key} active={activeRoute(prop.layout + prop.path)}>
                     <Link href={prop.layout + prop.path}>
-                        <NavLink
-                            href={prop.layout + prop.path}
-                            active={activeRoute(prop.layout + prop.path)}
-                            onClick={closeCollapse}
-                        >
-                            <i className={prop.icon}/>
-                            {prop.name}
+                        <NavLink href={prop.layout + prop.path} active={activeRoute(prop.layout + prop.path)} onClick={closeCollapse}>
+                            <FontAwesomeIcon icon={prop.icon} />
+                            <span className="ml-3">{prop.name}</span>
                         </NavLink>
                     </Link>
                 </NavItem>
@@ -47,18 +43,10 @@ function Sidebar(props) {
     const {routes} = props;
 
     return (
-        <Navbar
-            className="navbar-vertical fixed-left navbar-light bg-white"
-            expand="md"
-            id="sidenav-main"
-        >
+        <Navbar className="navbar-vertical fixed-left navbar-light bg-white" expand="md" id="sidenav-main">
             <Container fluid>
                 {/* Toggler */}
-                <button
-                    className="navbar-toggler"
-                    type="button"
-                    onClick={toggleCollapse}
-                >
+                <button className="navbar-toggler" type="button" onClick={toggleCollapse}>
                     <span className="navbar-toggler-icon"/>
                 </button>
                 {/* Brand */}
@@ -76,9 +64,7 @@ function Sidebar(props) {
                 <Collapse navbar isOpen={collapseOpen}>
                     <div className="navbar-collapse-header d-md-none">
                         <Row>
-                            <Col className="collapse-brand" xs="6">
-                                HEN HOUSE
-                            </Col>
+                            <Col className="collapse-brand" xs="6">HEN HOUSE</Col>
                             <Col className="collapse-close" xs="6">
                                 <button className="navbar-toggler" type="button" onClick={toggleCollapse}>
                                     <span/>
