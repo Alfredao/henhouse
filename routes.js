@@ -49,6 +49,12 @@ const routes = [
         icon: faQuestion,
         layout: "/game",
     },
+    {
+        path: "/admin",
+        name: "Admin",
+        icon: faQuestion,
+        layout: "/game",
+    },
 ];
 
 export default routes;

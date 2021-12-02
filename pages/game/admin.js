@@ -13,26 +13,26 @@ const Admin = (props) => {
     const {provider, selectedAccount} = walletState();
     const web3 = new Web3(provider);
 
-    let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS);
+    let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
     const mintGovToken = async function () {
         await token.methods.mint(
             selectedAccount,
-            web3.utils.toWei('1000', 'ether')
+            web3.utils.toWei('5000', 'ether')
         ).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
 
     const setMintToken = async function () {
-        await nft.methods.setHenToken(process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS).send({
+        await nft.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
 
     const setEggPrice = async function () {
-        await nft.methods.setEggPrice(web3.utils.toWei('1', 'ether')).send({
+        await nft.methods.setEggPrice(web3.utils.toWei('500', 'ether')).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };

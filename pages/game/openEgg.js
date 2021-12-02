@@ -17,7 +17,7 @@ const OpenEgg = (props) => {
 
     const web3 = new Web3(provider);
 
-    let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS);
+    let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
     useEffect(async function () {
