@@ -22,13 +22,21 @@ async function main() {
 
     console.log("Token deployed to:", token.address);
 
-    const nftContractFactory = await hre.ethers.getContractFactory("Hen");
-    const nftToken = await nftContractFactory.deploy();
+    const icoContractFactory = await hre.ethers.getContractFactory("HenHouseIco");
+    const icoToken = await icoContractFactory.deploy();
 
-    await nftToken.initialize("Black Hen", "BlackHEN");
-    await nftToken.deployed();
+    await icoToken.initialize();
+    await icoToken.deployed();
 
-    console.log("NFT token deployed to:", nftToken.address);
+    console.log("ICO deployed to:", icoToken.address);
+
+    // const nftContractFactory = await hre.ethers.getContractFactory("Hen");
+    // const nftToken = await nftContractFactory.deploy();
+    //
+    // await nftToken.initialize("Black Hen", "BlackHEN");
+    // await nftToken.deployed();
+    //
+    // console.log("NFT token deployed to:", nftToken.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
