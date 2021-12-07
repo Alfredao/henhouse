@@ -29,6 +29,12 @@ const Admin = (props) => {
         await token.methods.grantRole(process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
             from: selectedAccount
         }).then((r) => console.log(r));
+
+    };
+    const getInWhitelist = async function () {
+        await ico.methods.addWhitelistAddress('0xfae678bfd055cbc1094f9aca7fd205c3b16c2dca').send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
     };
 
     const mintGovToken = async function () {
@@ -74,6 +80,7 @@ const Admin = (props) => {
                                             <div className="jumbotron">
                                                 <Button className="btn-lg btn-block" onClick={setIcoMintToken}>Definir moeda do ICO</Button>
                                                 <Button className="btn-lg btn-block" onClick={grantRoleIco}>Garantir permissão de gerar tokens pelo ICO</Button>
+                                                <Button className="btn-lg btn-block" onClick={getInWhitelist}>Entrar na whitelist</Button>
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={setMintToken}>Definir moeda do market</Button>
                                                 <Button className="btn-lg btn-block" onClick={setEggPrice}>Definir preço do ovo</Button>

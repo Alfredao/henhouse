@@ -10,6 +10,15 @@ import "./HenHouse.sol";
 contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     HenHouse _henHouse;
+    mapping(address => bool) whitelist;
+
+    event AddedToWhitelist(address indexed account);
+    event RemovedFromWhitelist(address indexed account);
+
+    modifier onlyWhitelisted() {
+        require(isWhitelisted(msg.sender));
+        _;
+    }
 
     function initialize() initializer public {
         __Ownable_init();
@@ -36,6 +45,8 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
      * @param beneficiary Recipient of the token purchase
      */
     function buyTokens(address beneficiary) public nonReentrant payable {
+        require(isWhitelisted(beneficiary), "Whitelist: beneficiary isnt't in the the whitelist");
+
         uint256 weiAmount = msg.value;
 
         require(beneficiary != address(0));
@@ -50,5 +61,33 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
 
     function setHenToken(HenHouse henHouse) onlyOwner external {
         _henHouse = henHouse;
+    }
+
+    function addWhitelistAddress(address _address) public onlyOwner {
+        whitelist[_address] = true;
+
+        emit AddedToWhitelist(_address);
+    }
+
+    function removeFromWhitelist(address _address) public onlyOwner {
+        whitelist[_address] = false;
+
+        emit RemovedFromWhitelist(_address);
+    }
+
+    function addWhitelistAddresses(address[] memory addresses) public onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            addWhitelistAddress(addresses[i]);
+        }
+    }
+
+    function removeWhitelistAddresses(address[] memory addresses) public onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            removeFromWhitelist(addresses[i]);
+        }
+    }
+
+    function isWhitelisted(address _address) public view returns (bool) {
+        return whitelist[_address];
     }
 }
