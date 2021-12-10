@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -16,7 +16,7 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     event RemovedFromWhitelist(address indexed account);
 
     modifier onlyWhitelisted() {
-        require(isWhitelisted(msg.sender));
+        require(isWhitelisted(msg.sender), "Whitelist: beneficiary isnt't in the the whitelist");
         _;
     }
 
@@ -33,7 +33,7 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
      * buyTokens directly when purchasing tokens from a contract.
      */
     receive() external payable {
-        buyTokens(_msgSender());
+        buyTokens(msg.sender);
     }
 
     /**
@@ -44,9 +44,7 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
      *
      * @param beneficiary Recipient of the token purchase
      */
-    function buyTokens(address beneficiary) public nonReentrant payable {
-        require(isWhitelisted(beneficiary), "Whitelist: beneficiary isnt't in the the whitelist");
-
+    function buyTokens(address beneficiary) public onlyWhitelisted nonReentrant payable {
         uint256 weiAmount = msg.value;
 
         require(beneficiary != address(0));
@@ -55,10 +53,20 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         HenHouse(_henHouse).mint(beneficiary, weiAmount);
     }
 
+    /**
+     * Get hen token
+     *
+     * @return HenHouse
+     */
     function getHenToken() external view returns (HenHouse) {
         return _henHouse;
     }
 
+    /**
+     * Set hen token
+     *
+     * @param henHouse The Hen House governance  token
+     */
     function setHenToken(HenHouse henHouse) onlyOwner external {
         _henHouse = henHouse;
     }

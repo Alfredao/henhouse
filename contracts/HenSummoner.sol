@@ -1,29 +1,30 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./Hen.sol";
 import "./HenHouse.sol";
 
 contract HenSummoner is Initializable, OwnableUpgradeable {
 
-    HenHouse _henHouse;
-
     uint256 _summonPrice;
+    Hen _hen;
+    HenHouse _henHouse;
 
     function initialize() initializer public {
         __Ownable_init();
     }
 
-    function summon() public {
-        HenHouse(_henHouse).spend(msg.sender, 1 ether);
+    function summon() public  {
+        Hen(_hen).safeMint(msg.sender);
     }
 
-    function getSummonPrice() external view returns (uint) {
+    function getSummonPrice() external view returns (uint256) {
         return _summonPrice;
     }
 
-    function setSummonPrice(uint summonPrice) onlyOwner external {
+    function setSummonPrice(uint256 summonPrice) onlyOwner external {
         _summonPrice = summonPrice;
     }
 
@@ -33,5 +34,13 @@ contract HenSummoner is Initializable, OwnableUpgradeable {
 
     function setHenToken(HenHouse henHouse) onlyOwner external {
         _henHouse = henHouse;
+    }
+
+    function getHen() external view returns (Hen) {
+        return _hen;
+    }
+
+    function setHen(Hen hen) onlyOwner external {
+        _hen = hen;
     }
 }

@@ -6,49 +6,46 @@ import {walletState} from "../../states/walletState";
 import Web3 from "web3";
 
 import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
-import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json"
+import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json"
 
 const OpenEgg = (props) => {
 
     const {provider, selectedAccount} = walletState();
     const [modalOpen, setModalOpen] = React.useState(false);
     const [tokenBalance, setTokenBalance] = React.useState(0.0);
-    const [eggPrice, setEggPrice] = React.useState(0.0);
+    const [summonPrice, setSummonPrice] = React.useState(0.0);
 
     const web3 = new Web3(provider);
 
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
-    let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
+    let summoner = new web3.eth.Contract(summonerJson.abi, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS);
 
     useEffect(async function () {
         if (selectedAccount) {
-            await token.methods.balanceOf(selectedAccount).call({
-                from: selectedAccount
-            }).then((r) => setTokenBalance(r));
-
-            await nft.methods.getEggPrice().call().then((r) => setEggPrice(r));
+            await token.methods.balanceOf(selectedAccount).call().then((r) => setTokenBalance(r));
+            await summoner.methods.getSummonPrice().call().then((r) => setSummonPrice(r));
         }
     });
 
     const openEgg = async function () {
 
-        if (tokenBalance < eggPrice) {
+        if (tokenBalance < summonPrice) {
             return false;
         }
 
-        await nft.methods.safeMint(
-            selectedAccount,
-            "https://my-json-server.typicode.com/abcoathup/samplenft/tokens/0"
-        ).send({
+        await summoner.methods.summon().send({
             from: selectedAccount
         }).on('transactionHash', function (hash) {
 
         }).on('confirmation', function (confirmationNumber, receipt) {
 
         }).on('receipt', async function (receipt) {
-            await nft.methods.tokenURI(receipt.events.Transfer.returnValues.tokenId).call({
-                from: selectedAccount
-            }).then((r) => setModalOpen(true));
+
+            setModalOpen(true)
+
+            // await summoner.methods.tokenURI(receipt.events.Transfer.returnValues.tokenId).call({
+            //     from: selectedAccount
+            // }).then((r) => setModalOpen(true));
 
         }).on('error', function (error, receipt) {
             // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
@@ -78,8 +75,8 @@ const OpenEgg = (props) => {
                                                 <h1>Consiga uma galinha agora</h1>
                                                 <h4>Abra um ovo e boa sorte</h4>
                                                 <img style={{height: '400px', width: '100%', display: 'block'}} src="/img/breakegg.jpg" alt={"break-egg"}/>
-                                                <p className="lead">Pague apenas {web3.utils.fromWei(web3.utils.toBN(eggPrice), 'ether')} HEN e receba uma galinha com atributos aleatórios</p>
-                                                <Button className="btn-lg btn-block" onClick={openEgg}>{tokenBalance > eggPrice ? "Abrir ovo" : "Saldo insuficiente. Compre novos tokens"}</Button>
+                                                <p className="lead">Pague apenas {web3.utils.fromWei(web3.utils.toBN(summonPrice), 'ether')} HEN e receba uma galinha com atributos aleatórios</p>
+                                                <Button className="btn-lg btn-block" onClick={openEgg}>{tokenBalance > summonPrice ? "Abrir ovo" : "Saldo insuficiente. Compre novos tokens"}</Button>
                                                 <p className="lead mt-3 text-center">Você tem {web3.utils.fromWei(web3.utils.toBN(tokenBalance), 'ether')} HEN</p>
                                             </div>
                                         </div>
