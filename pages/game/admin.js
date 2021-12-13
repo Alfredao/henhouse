@@ -8,6 +8,7 @@ import Web3 from "web3";
 import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
 import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json"
 import icoJson from "../../artifacts/contracts/HenHouseIco.sol/HenHouseIco.json"
+import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json"
 
 const Admin = (props) => {
 
@@ -17,6 +18,7 @@ const Admin = (props) => {
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
     let summoner = new web3.eth.Contract(summonerJson.abi, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS);
     let ico = new web3.eth.Contract(icoJson.abi, process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS);
+    let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
     const setHenToken = async function () {
         await ico.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
@@ -24,12 +26,12 @@ const Admin = (props) => {
         }).then((r) => console.log(r));
     };
 
-    const grantRole = async function () {
+    const grantRoleMintIco = async function () {
         await token.methods.grantRole(process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
             from: selectedAccount
         }).then((r) => console.log(r));
-
     };
+
     const addWhitelistAddress = async function () {
         await ico.methods.addWhitelistAddress(selectedAccount).send({
             from: selectedAccount
@@ -37,10 +39,7 @@ const Admin = (props) => {
     };
 
     const setSummonToken = async function () {
-
-        console.log(summoner.methods);
-
-        await summoner.methods.setSummonToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
+        await summoner.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -53,6 +52,12 @@ const Admin = (props) => {
 
     const setHen = async function () {
         await summoner.methods.setHen(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const grantRoleMintNft = async function () {
+        await nft.methods.grantRole(process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -78,12 +83,13 @@ const Admin = (props) => {
                                         <div className="col-6 mx-auto">
                                             <div className="jumbotron">
                                                 <Button className="btn-lg btn-block" onClick={setHenToken}>Definir moeda do ICO</Button>
-                                                <Button className="btn-lg btn-block" onClick={grantRole}>Garantir permissão de gerar tokens pelo ICO</Button>
+                                                <Button className="btn-lg btn-block" onClick={grantRoleMintIco}>Garantir permissão de gerar tokens pelo ICO</Button>
                                                 <Button className="btn-lg btn-block" onClick={addWhitelistAddress}>Entrar na whitelist</Button>
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={setSummonToken}>Definir moeda de summon</Button>
                                                 <Button className="btn-lg btn-block" onClick={setSummonPrice}>Definir preço do summon</Button>
-                                                <Button className="btn-lg btn-block" onClick={setSummonPrice}>Definir item para summon</Button>
+                                                <Button className="btn-lg btn-block" onClick={setHen}>Definir item para summon</Button>
+                                                <Button className="btn-lg btn-block" onClick={grantRoleMintNft}>Garantir permissão de summon</Button>
                                             </div>
                                         </div>
                                     </Row>

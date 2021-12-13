@@ -8,16 +8,17 @@ import "./HenHouse.sol";
 
 contract HenSummoner is Initializable, OwnableUpgradeable {
 
-    uint256 _summonPrice;
-    Hen _hen;
-    HenHouse _henHouse;
+    Hen private _hen;
+    HenHouse private _henHouse;
+    uint256 private _summonPrice;
 
     function initialize() initializer public {
         __Ownable_init();
     }
 
-    function summon() public  {
+    function summon() public {
         Hen(_hen).safeMint(msg.sender);
+        HenHouse(_henHouse).spend(msg.sender, _summonPrice);
     }
 
     function getSummonPrice() external view returns (uint256) {

@@ -76,7 +76,7 @@ const OpenEgg = (props) => {
                                                 <h4>Abra um ovo e boa sorte</h4>
                                                 <img style={{height: '400px', width: '100%', display: 'block'}} src="/img/breakegg.jpg" alt={"break-egg"}/>
                                                 <p className="lead">Pague apenas {web3.utils.fromWei(web3.utils.toBN(summonPrice), 'ether')} HEN e receba uma galinha com atributos aleatórios</p>
-                                                <Button className="btn-lg btn-block" onClick={openEgg}>{tokenBalance > summonPrice ? "Abrir ovo" : "Saldo insuficiente. Compre novos tokens"}</Button>
+                                                <Button className="btn-lg btn-block" onClick={openEgg}>{tokenBalance >= summonPrice ? "Abrir ovo" : "Saldo insuficiente. Compre novos tokens"}</Button>
                                                 <p className="lead mt-3 text-center">Você tem {web3.utils.fromWei(web3.utils.toBN(tokenBalance), 'ether')} HEN</p>
                                             </div>
                                         </div>

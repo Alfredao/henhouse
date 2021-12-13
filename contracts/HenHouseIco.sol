@@ -9,8 +9,9 @@ import "./HenHouse.sol";
 
 contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
-    HenHouse _henHouse;
+    HenHouse private _henHouse;
     mapping(address => bool) whitelist;
+    uint256 private _releaseTime;
 
     event AddedToWhitelist(address indexed account);
     event RemovedFromWhitelist(address indexed account);

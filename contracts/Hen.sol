@@ -13,6 +13,15 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     CountersUpgradeable.Counter private _tokenIdCounter;
 
+    struct HenAttr {
+        uint8 level;
+        uint8 productivity;
+        uint256 endurance;
+        uint256 lastMeal;
+    }
+
+    mapping(uint256 => HenAttr) private _tokenDetails;
+
     function initialize(string memory name, string memory ticker) initializer public {
         __ERC721_init(name, ticker);
         __ERC721Burnable_init();
@@ -29,12 +38,46 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
     function safeMint(address to) public onlyRole(MINTER_ROLE) {
         uint256 tokenId = _tokenIdCounter.current();
 
+        // Elaborar lógica de criar esses atributos de forma aleatória
+        _tokenDetails[tokenId] = HenAttr(95, 1, 50, block.timestamp);
+
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
 
-    // The following functions are overrides required by Solidity.
+    function getHenDetail(uint tokenId) public view returns (HenAttr memory) {
+        return _tokenDetails[tokenId];
+    }
 
+    function getHenByUser(address user) public view returns (uint256[] memory) {
+        uint256 henCount = balanceOf(user);
+
+        if (henCount == 0) {
+            return new uint256[](0);
+        }
+
+        uint256[] memory result = new uint256[](henCount);
+        uint256 resIndex = 0;
+        uint256 i;
+
+        for (i = 0; i < _tokenIdCounter.current(); i++) {
+            if (ownerOf(i) == user) {
+                result[resIndex] = i;
+                resIndex++;
+            }
+        }
+
+        return result;
+    }
+
+    function feed(uint256 tokenId) public {
+        HenAttr storage hen = _tokenDetails[tokenId];
+
+        require(hen.lastMeal + hen.endurance > block.timestamp);
+        hen.lastMeal = block.timestamp;
+    }
+
+    // The following functions are overrides required by Solidity.
     function supportsInterface(bytes4 interfaceId) public view override(ERC721Upgradeable, AccessControlUpgradeable) returns (bool)
     {
         return super.supportsInterface(interfaceId);
