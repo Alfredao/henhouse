@@ -16,8 +16,6 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
     struct HenAttr {
         uint8 level;
         uint8 productivity;
-        uint256 endurance;
-        uint256 lastMeal;
     }
 
     mapping(uint256 => HenAttr) private _tokenDetails;
@@ -35,14 +33,16 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
         _grantRole(role, to);
     }
 
-    function safeMint(address to) public onlyRole(MINTER_ROLE) {
+    function safeMint(address to) public onlyRole(MINTER_ROLE) returns (uint256) {
         uint256 tokenId = _tokenIdCounter.current();
 
         // Elaborar lógica de criar esses atributos de forma aleatória
-        _tokenDetails[tokenId] = HenAttr(95, 1, 50, block.timestamp);
+        _tokenDetails[tokenId] = HenAttr(1, 95);
 
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
+
+        return tokenId;
     }
 
     function getHenDetail(uint tokenId) public view returns (HenAttr memory) {
@@ -68,13 +68,6 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
         }
 
         return result;
-    }
-
-    function feed(uint256 tokenId) public {
-        HenAttr storage hen = _tokenDetails[tokenId];
-
-        require(hen.lastMeal + hen.endurance > block.timestamp);
-        hen.lastMeal = block.timestamp;
     }
 
     // The following functions are overrides required by Solidity.

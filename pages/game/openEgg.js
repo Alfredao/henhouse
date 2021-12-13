@@ -7,6 +7,7 @@ import Web3 from "web3";
 
 import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
 import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json"
+import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json"
 
 const OpenEgg = (props) => {
 
@@ -14,11 +15,13 @@ const OpenEgg = (props) => {
     const [modalOpen, setModalOpen] = React.useState(false);
     const [tokenBalance, setTokenBalance] = React.useState(0.0);
     const [summonPrice, setSummonPrice] = React.useState(0.0);
+    const [hen, setHen] = React.useState({});
 
     const web3 = new Web3(provider);
 
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
     let summoner = new web3.eth.Contract(summonerJson.abi, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS);
+    let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
     useEffect(async function () {
         if (selectedAccount) {
@@ -35,20 +38,13 @@ const OpenEgg = (props) => {
 
         await summoner.methods.summon().send({
             from: selectedAccount
-        }).on('transactionHash', function (hash) {
-
-        }).on('confirmation', function (confirmationNumber, receipt) {
-
         }).on('receipt', async function (receipt) {
-
-            setModalOpen(true)
-
-            // await summoner.methods.tokenURI(receipt.events.Transfer.returnValues.tokenId).call({
-            //     from: selectedAccount
-            // }).then((r) => setModalOpen(true));
-
-        }).on('error', function (error, receipt) {
-            // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
+            await nft.methods.getHenDetail(
+                receipt.events.NewHen.returnValues.tokenId
+            ).call().then((detail) => {
+                setHen(detail);
+                setModalOpen(true);
+            });
         });
     };
 
@@ -96,7 +92,8 @@ const OpenEgg = (props) => {
                     <p className="card-text mt-6">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
                     <hr/>
                     <p className="card-text text-center pl-4">
-                        {["A", "B", "C", "D", "E"].map((attr, i) => <span className={"mr-5"}>{attr} <strong>99</strong></span>)}
+                        <span className={"mr-4"}><strong>Level:</strong> {hen.level}</span>
+                        <span className={"mr-4"}><strong>Produtividade:</strong> {hen.productivity}</span>
                     </p>
                 </ModalBody>
                 <ModalFooter>

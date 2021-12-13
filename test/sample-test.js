@@ -1,6 +1,6 @@
 // We import Chai to use its asserting functions here.
 const {expect} = require("chai");
-const {ethers} = require("hardhat");
+const {ethers, upgrades} = require("hardhat");
 
 // `describe` is a Mocha function that allows you to organize your tests. It's
 // not actually needed, but having your tests organized makes debugging them
@@ -36,9 +36,7 @@ describe("Token contract", function () {
         // To deploy our contract, we just have to call Token.deploy() and await
         // for it to be deployed(), which happens once its transaction has been
         // mined.
-        token = await tokenFactory.deploy();
-
-        await token.initialize();
+        token = await upgrades.deployProxy(tokenFactory);
     });
 
     // You can nest describe calls to create subsections.
@@ -153,9 +151,7 @@ describe("NFT contract", function () {
         // To deploy our contract, we just have to call Token.deploy() and await
         // for it to be deployed(), which happens once its transaction has been
         // mined.
-        token = await contractFactory.deploy();
-
-        await token.initialize("Black Hen", "BlackHEN");
+        token = await upgrades.deployProxy(contractFactory, ["Black Hen", "BlackHEN"])
     });
 
     // You can nest describe calls to create subsections.

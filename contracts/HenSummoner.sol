@@ -12,13 +12,18 @@ contract HenSummoner is Initializable, OwnableUpgradeable {
     HenHouse private _henHouse;
     uint256 private _summonPrice;
 
+    event NewHen(address indexed owner, Hen hen, uint256 tokenId);
+
     function initialize() initializer public {
         __Ownable_init();
     }
 
     function summon() public {
-        Hen(_hen).safeMint(msg.sender);
+        uint256 tokenId = Hen(_hen).safeMint(msg.sender);
+
         HenHouse(_henHouse).spend(msg.sender, _summonPrice);
+
+        emit NewHen(msg.sender, _hen, tokenId);
     }
 
     function getSummonPrice() external view returns (uint256) {

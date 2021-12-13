@@ -4,6 +4,7 @@ import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 
 const Faq = (props) => {
+
     return (
         <>
             <Header/>
