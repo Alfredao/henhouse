@@ -9,11 +9,15 @@ services:
       - "8082:80"
     links:
       - node
+    depends_on:
+      - node
   node:
     image: node:alpine
     container_name: henhouse-node
+    working_dir: /home/app
+    restart: always
     volumes:
-      - .:/home/node/app
+      - .:/home/app
     ports:
       - "3001:3000"
-    command: "cd /home/node/app && npm start"
+    command: "npm run dev"
