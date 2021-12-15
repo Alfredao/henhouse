@@ -89,12 +89,14 @@ const OpenEgg = (props) => {
                 </div>
                 <ModalBody>
                     <img src="/img/hen/black.jpg" alt="hen" className={"img-fluid"}/>
-                    <p className="card-text mt-6">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
                     <hr/>
-                    <p className="card-text text-center pl-4">
-                        <span className={"mr-4"}><strong>Level:</strong> {hen.level}</span>
-                        <span className={"mr-4"}><strong>Produtividade:</strong> {hen.productivity}</span>
-                    </p>
+                    <div className="d-flex justify-content-between align-items-center mt-3 mb-3">
+                        <span className={"mr-2"}><strong>P /</strong> {hen.productivity}</span>
+                        <span className={"mr-2"}><strong>R /</strong> {hen.endurance}</span>
+                        <span className={"mr-2"}><strong>F /</strong> {hen.strength}</span>
+                        <span className={"mr-2"}><strong>E /</strong> {hen.stamina}</span>
+                        <span className={"mr-2"}><strong>S /</strong> {hen.health}</span>
+                    </div>
                 </ModalBody>
                 <ModalFooter>
                     <Button color="primary" type="button" onClick={() => setModalOpen(!modalOpen)}>

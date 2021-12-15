@@ -12,10 +12,15 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     CountersUpgradeable.Counter private _tokenIdCounter;
+    uint initialNumber;
 
     struct HenAttr {
         uint8 level;
         uint8 productivity;
+        uint8 endurance;
+        uint8 strength;
+        uint8 stamina;
+        uint8 health;
     }
 
     mapping(uint256 => HenAttr) private _tokenDetails;
@@ -37,7 +42,14 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
         uint256 tokenId = _tokenIdCounter.current();
 
         // Elaborar lógica de criar esses atributos de forma aleatória
-        _tokenDetails[tokenId] = HenAttr(1, 95);
+        _tokenDetails[tokenId] = HenAttr(
+            1, // level
+            random(), // productivity
+            random(), // endurance
+            random(), // strength
+            random(), // stamina
+            random() // health
+        );
 
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
@@ -68,6 +80,10 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
         }
 
         return result;
+    }
+
+    function random() private returns (uint8) {
+        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, initialNumber++))) % 99) + 1;
     }
 
     // The following functions are overrides required by Solidity.
