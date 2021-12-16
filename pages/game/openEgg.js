@@ -3,21 +3,18 @@ import {Button, Card, CardBody, CardHeader, Col, Container, Modal, ModalBody, Mo
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 import {walletState} from "../../states/walletState";
-import Web3 from "web3";
 
-import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
-import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json"
-import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json"
+import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json";
+import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json";
+import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json";
 
 const OpenEgg = (props) => {
 
-    const {provider, selectedAccount} = walletState();
+    const {web3, selectedAccount} = walletState();
     const [modalOpen, setModalOpen] = React.useState(false);
     const [tokenBalance, setTokenBalance] = React.useState(0.0);
     const [summonPrice, setSummonPrice] = React.useState(0.0);
     const [hen, setHen] = React.useState({});
-
-    const web3 = new Web3(provider);
 
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
     let summoner = new web3.eth.Contract(summonerJson.abi, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS);
