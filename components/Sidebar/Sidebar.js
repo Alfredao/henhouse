@@ -40,6 +40,7 @@ function Sidebar(props) {
             );
         });
     };
+
     const {routes} = props;
 
     return (

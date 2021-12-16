@@ -7,8 +7,9 @@ export const walletState = create(set => ({
     selectedAccount: undefined,
     network: undefined,
     secureProtocolError: false,
-    token: undefined,
-    nft: undefined,
+    contracts: {
+
+    },
     clearAccountData: function () {
         this.balances = {};
         this.selectedAccount = undefined;

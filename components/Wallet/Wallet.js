@@ -119,6 +119,7 @@ function Wallet() {
 
         // Get a Web3 instance for the wallet
         const web3 = new Web3(provider);
+        walletState.setState({web3: web3});
 
         // Get connected chain id from Ethereum node
         const chainId = await web3.eth.getChainId();
