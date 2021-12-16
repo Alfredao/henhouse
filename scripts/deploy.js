@@ -55,9 +55,9 @@ async function main() {
 
     // We get the contract to deploy
 
-    // await HenHouse();
-    // await Egg();
-    // await ICO();
+    await HenHouse();
+    await Egg();
+    await ICO();
     await NFT("Black Hen", "BlackHEN");
     await Summoner();
 }
