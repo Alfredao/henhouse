@@ -3,3 +3,4 @@
 /.next/
 /cache/
 .openzeppelin/.session
+.env
