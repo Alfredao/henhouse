@@ -37,6 +37,13 @@ const Admin = (props) => {
             from: selectedAccount
         }).then((r) => console.log(r));
     };
+    const sendBNB = async function () {
+        web3.eth.sendTransaction({
+            from: selectedAccount,
+            to: process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS,
+            value: web3.utils.toWei("0.1", "ether")
+        });
+    };
 
     const setSummonToken = async function () {
         await summoner.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
@@ -82,9 +89,11 @@ const Admin = (props) => {
                                     <Row className="align-self-center w-100">
                                         <div className="col-6 mx-auto">
                                             <div className="jumbotron">
+                                                <Button className="btn-lg btn-block" onClick={addWhitelistAddress}>Entrar na whitelist</Button>
+                                                <Button className="btn-lg btn-block" onClick={sendBNB}>Enviar 0.1 BNB</Button>
+                                                <hr/>
                                                 <Button className="btn-lg btn-block" onClick={setHenToken}>Definir moeda do ICO</Button>
                                                 <Button className="btn-lg btn-block" onClick={grantRoleMintIco}>Garantir permissão de gerar tokens pelo ICO</Button>
-                                                <Button className="btn-lg btn-block" onClick={addWhitelistAddress}>Entrar na whitelist</Button>
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={setSummonToken}>Definir moeda de summon</Button>
                                                 <Button className="btn-lg btn-block" onClick={setSummonPrice}>Definir preço do summon</Button>
