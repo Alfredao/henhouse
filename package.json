@@ -7,7 +7,7 @@
     "npm": "8.x"
   },
   "scripts": {
-    "start": "next start",
+    "start": "next start -p $PORT",
     "build": "next build",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && rm -rf .next/ && rm -rf out/ && npm install && npm run dev",
     "compile:scss": "node-sass --importer node_modules/node-sass-package-importer/dist/cli.js assets/scss/nextjs-argon-dashboard.scss assets/css/nextjs-argon-dashboard.css",
