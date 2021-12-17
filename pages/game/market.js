@@ -88,7 +88,7 @@ const Market = (props) => {
                                                     <div className="btn-group">
                                                         <Button onClick={() => {
                                                             router.push({
-                                                                pathname: '/game/hen/buy/[id]',
+                                                                pathname: '/game/market/buy/[id]',
                                                                 query: {id: item.hen.id},
                                                             })
                                                         }}><FontAwesomeIcon icon={faDollarSign}/> COMPRAR</Button>

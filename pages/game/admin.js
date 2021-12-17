@@ -9,6 +9,7 @@ import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
 import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json"
 import icoJson from "../../artifacts/contracts/HenHouseIco.sol/HenHouseIco.json"
 import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json"
+import marketJson from "../../artifacts/contracts/Marketplace.sol/Marketplace.json"
 
 const Admin = (props) => {
 
@@ -17,6 +18,7 @@ const Admin = (props) => {
 
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
     let summoner = new web3.eth.Contract(summonerJson.abi, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS);
+    let market = new web3.eth.Contract(marketJson.abi, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS);
     let ico = new web3.eth.Contract(icoJson.abi, process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS);
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
@@ -37,6 +39,7 @@ const Admin = (props) => {
             from: selectedAccount
         }).then((r) => console.log(r));
     };
+
     const sendBNB = async function () {
         web3.eth.sendTransaction({
             from: selectedAccount,
@@ -65,6 +68,12 @@ const Admin = (props) => {
 
     const grantRoleMintNft = async function () {
         await nft.methods.grantRole(process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setMarketToken = async function () {
+        await market.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -99,6 +108,8 @@ const Admin = (props) => {
                                                 <Button className="btn-lg btn-block" onClick={setSummonPrice}>Definir preço do summon</Button>
                                                 <Button className="btn-lg btn-block" onClick={setHen}>Definir item para summon</Button>
                                                 <Button className="btn-lg btn-block" onClick={grantRoleMintNft}>Garantir permissão de summon</Button>
+                                                <hr/>
+                                                <Button className="btn-lg btn-block" onClick={setMarketToken}>Definir moeda do market</Button>
                                             </div>
                                         </div>
                                     </Row>

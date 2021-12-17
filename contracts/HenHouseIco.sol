@@ -45,7 +45,7 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
      *
      * @param beneficiary Recipient of the token purchase
      */
-    function buyTokens(address beneficiary) public onlyWhitelisted nonReentrant payable {
+    function buyTokens(address beneficiary) public nonReentrant payable {
         uint256 weiAmount = msg.value * 600;
 
         require(beneficiary != address(0));

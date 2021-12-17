@@ -7,11 +7,13 @@ import marketJson from "../../../../artifacts/contracts/Marketplace.sol/Marketpl
 import {useRouter} from "next/router";
 import {walletState} from "../../../../states/walletState";
 import BackButton from "../../../../components/Utils/BackButton";
+import tokenJson from "../../../../artifacts/contracts/HenHouse.sol/HenHouse.json";
 
 const SellHen = (props) => {
     const router = useRouter();
     const {id} = router.query;
     const {selectedAccount, web3} = walletState();
+    const [allowance, setAllowance] = React.useState(0);
     const [hen, setHen] = React.useState({
         id: undefined,
         level: undefined,
@@ -24,21 +26,26 @@ const SellHen = (props) => {
 
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
     let market = new web3.eth.Contract(marketJson.abi, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS);
+    let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
 
-    const sellItem = async function() {
-        await market.methods.createMarketItem(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS, id, 10).send({from: selectedAccount}).then((r) => {
+    const buyItem = async function() {
+        await market.methods.createMarketSale(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS, id).send({from: selectedAccount}).then((r) => {
             console.log(r);
         });
     };
 
     const approve = async function() {
-        await nft.methods.setApprovalForAll(process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS, true).send({from: selectedAccount}).then((r) => {
+        await token.methods.approve(process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS, web3.utils.toWei(web3.utils.toBN(2**50))).send({from: selectedAccount}).then((r) => {
             console.log(r);
         });
     };
 
     useEffect(async () => {
         if (selectedAccount) {
+            await token.methods.allowance(selectedAccount, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS).call().then((r) => {
+                setAllowance(r);
+            });
+
             await nft.methods.getHenDetail(id).call().then((henDetail) => {
                 setHen({
                     id: id,
@@ -49,6 +56,10 @@ const SellHen = (props) => {
                     stamina: henDetail.stamina,
                     health: henDetail.health,
                 });
+            });
+
+            await market.methods.getDetail(id).call().then((a) => {
+                console.log(a);
             });
         }
     }, []);
@@ -64,7 +75,7 @@ const SellHen = (props) => {
                             <CardHeader className="border-0">
                                 <Row className="align-items-center">
                                     <div className="col">
-                                        <h3 className="mb-0">Galinha #{hen.id}<BackButton/></h3>
+                                        <h3 className="mb-0">Comprar galinha #{hen.id}<BackButton/></h3>
                                     </div>
                                 </Row>
                             </CardHeader>
@@ -110,10 +121,9 @@ const SellHen = (props) => {
                                         </ul>
                                     </Col>
                                     <Col xl={4}>
-                                        Informe o valor
-                                        <input type="text" className={"form-control mb-3"} />
-                                        <Button onClick={sellItem}>Colocar à venda</Button>
-                                        <Button onClick={approve}>Aprovar</Button>
+                                        <h3>Preço: 10</h3>
+                                        {allowance > 0 ? <Button onClick={buyItem}>Comprar</Button> :
+                                        <Button onClick={approve}>Aprovar</Button> }
                                     </Col>
                                 </Row>
                             </CardBody>

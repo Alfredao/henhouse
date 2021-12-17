@@ -89,7 +89,7 @@ const Hens = (props) => {
                                                         }}><FontAwesomeIcon icon={faArrowUp}/> TREINAR</Button>
                                                         <Button onClick={() => {
                                                             router.push({
-                                                                pathname: '/game/hen/sell/[id]',
+                                                                pathname: '/game/market/sell/[id]',
                                                                 query: {id: hen.id},
                                                             })
                                                         }}><FontAwesomeIcon icon={faDollarSign}/> VENDER</Button>

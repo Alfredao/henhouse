@@ -46,16 +46,16 @@ async function Summoner() {
 }
 
 async function Marketplace() {
-    // const marketplaceFactory = await ethers.getContractFactory("Marketplace");
-    // const marketPlace = await upgrades.deployProxy(marketplaceFactory);
-    // await marketPlace.deployed();
+    const marketplaceFactory = await ethers.getContractFactory("Marketplace");
+    const marketPlace = await upgrades.deployProxy(marketplaceFactory);
+    await marketPlace.deployed();
+
+    console.log("Marketplace token deployed to:", marketPlace.address);
+
+    // const v2 = await ethers.getContractFactory("Marketplace");
+    // await upgrades.upgradeProxy('0xf5059a5D33d5853360D16C683c16e67980206f36', v2);
     //
-    // console.log("Marketplace token deployed to:", marketPlace.address);
-
-    const v2 = await ethers.getContractFactory("Marketplace");
-    await upgrades.upgradeProxy('0xef790a3d33d4AB88092e1F2E32C34E673aff21B1', v2);
-
-    console.log('Contract upgraded');
+    // console.log('Contract upgraded');
 }
 
 async function main() {
