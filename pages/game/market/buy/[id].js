@@ -8,6 +8,8 @@ import {useRouter} from "next/router";
 import {walletState} from "../../../../states/walletState";
 import BackButton from "../../../../components/Utils/BackButton";
 import tokenJson from "../../../../artifacts/contracts/HenHouse.sol/HenHouse.json";
+import {faCheck, faDollarSign} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const SellHen = (props) => {
     const router = useRouter();
@@ -24,26 +26,35 @@ const SellHen = (props) => {
         health: undefined,
     });
 
+    const [marketItem, setMarketItem] = React.useState({
+        itemId: undefined,
+        nftContract: undefined,
+        price: 0,
+        seller: undefined,
+        sold: false,
+        soldTo: undefined,
+        tokenId: undefined
+    });
+
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
     let market = new web3.eth.Contract(marketJson.abi, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS);
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
 
-    const buyItem = async function() {
-        await market.methods.createMarketSale(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS, id).send({from: selectedAccount}).then((r) => {
-            console.log(r);
-        });
-    };
-
-    const approve = async function() {
-        await token.methods.approve(process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS, web3.utils.toWei(web3.utils.toBN(2**50))).send({from: selectedAccount}).then((r) => {
-            console.log(r);
-        });
-    };
-
     useEffect(async () => {
         if (selectedAccount) {
-            await token.methods.allowance(selectedAccount, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS).call().then((r) => {
-                setAllowance(r);
+
+            await getAllowance();
+
+            await market.methods.getDetail(id).call().then((marketItem) => {
+                setMarketItem({
+                    itemId: marketItem.itemId,
+                    nftContract: marketItem.nftContract,
+                    price: marketItem.price,
+                    seller: marketItem.seller,
+                    sold: marketItem.sold,
+                    soldTo: marketItem.soldTo,
+                    tokenId: marketItem.tokenId
+                });
             });
 
             await nft.methods.getHenDetail(id).call().then((henDetail) => {
@@ -57,12 +68,29 @@ const SellHen = (props) => {
                     health: henDetail.health,
                 });
             });
-
-            await market.methods.getDetail(id).call().then((a) => {
-                console.log(a);
-            });
         }
     }, []);
+
+    async function getAllowance() {
+        await token.methods.allowance(selectedAccount, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS).call().then((r) => {
+            setAllowance(r);
+        });
+    }
+
+    async function approveToken() {
+        await token.methods.approve(
+            process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS,
+            web3.utils.toWei("100000", "ether")
+        ).send({from: selectedAccount}).on('receipt', async function (receipt) {
+            await getAllowance();
+        });
+    }
+
+    async function buyItem() {
+        await market.methods.createMarketSale(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS, id).send({from: selectedAccount}).then((r) => {
+            console.log(r);
+        });
+    }
 
     return (
         <>
@@ -81,6 +109,9 @@ const SellHen = (props) => {
                             </CardHeader>
                             <CardBody>
                                 <Row>
+                                    <Col className={"mb-5"} xl={12}>{JSON.stringify(marketItem)}</Col>
+                                </Row>
+                                <Row>
                                     <Col xl={4}>
                                         <div className="card">
                                             <img className="card-img-top img-fluid" src="/img/hen/black.jpg" alt="Hen"/>
@@ -90,30 +121,35 @@ const SellHen = (props) => {
                                         <ul className="list-group">
                                             <li className="list-group-item">
                                                 <span className="attrName">Produtividade</span>
+                                                <span className="attrName float-right">{hen.productivity}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.productivity}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Resistência</span>
+                                                <span className="attrName float-right">{hen.endurance}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.endurance}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Força</span>
+                                                <span className="attrName float-right">{hen.strength}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.strength}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Energia</span>
+                                                <span className="attrName float-right">{hen.stamina}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.stamina}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Saúde</span>
+                                                <span className="attrName float-right">{hen.health}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.health}%`}}/>
                                                 </div>
@@ -121,9 +157,13 @@ const SellHen = (props) => {
                                         </ul>
                                     </Col>
                                     <Col xl={4}>
-                                        <h3>Preço: 10</h3>
-                                        {allowance > 0 ? <Button onClick={buyItem}>Comprar</Button> :
-                                        <Button onClick={approve}>Aprovar</Button> }
+                                        <h2>Preço: {web3.utils.fromWei(web3.utils.toBN(marketItem.price), "ether")} HEN</h2>
+                                        {marketItem.seller === selectedAccount ? "" :
+                                        <>
+                                            {parseInt(allowance.toString()) > parseInt(marketItem.price) ?
+                                            <Button onClick={buyItem}><FontAwesomeIcon icon={faDollarSign}/> Comprar</Button> :
+                                            <Button onClick={approveToken}><FontAwesomeIcon icon={faCheck}/> Autorizar contrato</Button>}
+                                        </>}
                                     </Col>
                                 </Row>
                             </CardBody>

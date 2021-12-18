@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
+import {Button, Card, CardBody, CardHeader, Col, Container, Form, Row,} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 import nftJson from "../../../../artifacts/contracts/Hen.sol/Hen.json";
@@ -27,14 +27,21 @@ const SellHen = (props) => {
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
     let market = new web3.eth.Contract(marketJson.abi, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS);
 
-    const sellItem = async function() {
-        await market.methods.createMarketItem(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS, id, web3.utils.toWei(web3.utils.toBN(10), 'ether')).send({from: selectedAccount}).then((r) => {
+    const approve = async function() {
+        await nft.methods.setApprovalForAll(process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS, true).send({from: selectedAccount}).then((r) => {
             console.log(r);
         });
     };
 
-    const approve = async function() {
-        await nft.methods.setApprovalForAll(process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS, true).send({from: selectedAccount}).then((r) => {
+    const submitForm = async (event) => {
+        event.preventDefault();
+        console.log(event);
+
+        await market.methods.createMarketItem(
+            process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS,
+            id,
+            web3.utils.toWei(web3.utils.toBN(event.target.price.value), 'ether')
+        ).send({from: selectedAccount}).then((r) => {
             console.log(r);
         });
     };
@@ -113,11 +120,14 @@ const SellHen = (props) => {
                                         </ul>
                                     </Col>
                                     <Col xl={4}>
-                                        Informe o valor
-                                        <input type="text" className={"form-control mb-3"} />
-                                        {isApprovedForAll ?
-                                        <Button onClick={sellItem}>Colocar à venda</Button> :
-                                        <Button onClick={approve}>Aprovar</Button> }
+                                        <Form onSubmit={submitForm}>
+                                            Informe o valor
+                                            <input type="text" name={"price"} className={"form-control mb-3"} />
+                                            {isApprovedForAll ?
+                                                <Button type="submit">Colocar à venda</Button> :
+                                                <Button onClick={approve}>Aprovar</Button> }
+                                        </Form>
+
                                     </Col>
                                 </Row>
                             </CardBody>

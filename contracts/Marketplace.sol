@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "./HenHouse.sol";
-import "./Hen.sol";
 
 contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -65,13 +64,17 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     function createMarketSale(address nftContract, uint256 itemId) public payable nonReentrant {
         uint price = marketItem[itemId].price;
         uint tokenId = marketItem[itemId].tokenId;
+        bool sold = marketItem[itemId].sold;
         address seller = marketItem[itemId].seller;
+
+        require(seller != msg.sender, "You can not buy your own item");
+        require(false == sold, "This item is already sold");
 
         // transfer nft own from contract to buyer
         IERC721Upgradeable(nftContract).safeTransferFrom(address(this), msg.sender, tokenId);
 
         // transfer price from owner token balance to seller
-        HenHouse(_henHouse).transferFrom(msg.sender, seller, price);
+        HenHouse(_henHouse).transferFrom(msg.sender, payable(seller), price);
 
         marketItem[itemId].soldTo = payable(msg.sender);
         marketItem[itemId].sold = true;

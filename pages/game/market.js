@@ -26,9 +26,22 @@ const Market = (props) => {
             const data = await market.methods.fetchMarketItems().call();
 
             const items = await Promise.all(data.map(async marketItem => {
+
+                const marketDetail = await market.methods.getDetail(marketItem.itemId).call().then((m) => {
+                    return {
+                        itemId: m.itemId,
+                        nftContract: m.nftContract,
+                        price: m.price,
+                        seller: m.seller,
+                        sold: m.sold,
+                        soldTo: m.soldTo,
+                        tokenId: m.tokenId
+                    };
+                });
+
                 return await nft.methods.getHenDetail(marketItem.tokenId).call().then((henDetail) => {
                     return {
-                        id: marketItem.itemId,
+                        ...marketDetail,
                         hen: {
                             id: marketItem.tokenId,
                             level: henDetail.level,
@@ -89,10 +102,10 @@ const Market = (props) => {
                                                         <Button onClick={() => {
                                                             router.push({
                                                                 pathname: '/game/market/buy/[id]',
-                                                                query: {id: item.hen.id},
+                                                                query: {id: item.itemId},
                                                             })
                                                         }}><FontAwesomeIcon icon={faDollarSign}/> COMPRAR</Button>
-                                                        <span className={"mt-2 ml-3"}>Preço: 10 HEN</span>
+                                                        <span className={"mt-2 ml-3"}>Preço: {web3.utils.fromWei(item.price, "ether")} HEN</span>
                                                     </div>
                                                 </div>
                                             </div>

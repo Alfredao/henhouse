@@ -17,7 +17,7 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     event RemovedFromWhitelist(address indexed account);
 
     modifier onlyWhitelisted() {
-        require(isWhitelisted(msg.sender), "Whitelist: beneficiary isnt't in the the whitelist");
+        require(isWhitelisted(msg.sender), "Whitelist: beneficiary is not in the the whitelist");
         _;
     }
 
