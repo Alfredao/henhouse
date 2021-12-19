@@ -89,30 +89,35 @@ const SellHen = (props) => {
                                         <ul className="list-group">
                                             <li className="list-group-item">
                                                 <span className="attrName">Produtividade</span>
+                                                <span className="attrName float-right">{hen.productivity}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.productivity}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Resistência</span>
+                                                <span className="attrName float-right">{hen.endurance}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.endurance}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Força</span>
+                                                <span className="attrName float-right">{hen.strength}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.strength}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Energia</span>
+                                                <span className="attrName float-right">{hen.stamina}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.stamina}%`}}/>
                                                 </div>
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Saúde</span>
+                                                <span className="attrName float-right">{hen.health}</span>
                                                 <div className="progress">
                                                     <div className="progress-bar" role="progressbar" style={{width: `${hen.health}%`}}/>
                                                 </div>
