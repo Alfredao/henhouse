@@ -29,9 +29,9 @@ async function ICO() {
     console.log("ICO deployed to:", icoToken.address);
 }
 
-async function NFT(name, ticker) {
+async function NFT() {
     const nftContractFactory = await ethers.getContractFactory("Hen");
-    const nftToken = await upgrades.deployProxy(nftContractFactory, [name, ticker]);
+    const nftToken = await upgrades.deployProxy(nftContractFactory, ["Hen", "Hen"]);
     await nftToken.deployed();
 
     console.log("NFT token deployed to:", nftToken.address);
@@ -46,16 +46,16 @@ async function Summoner() {
 }
 
 async function Marketplace() {
-    // const marketplaceFactory = await ethers.getContractFactory("Marketplace");
-    // const marketPlace = await upgrades.deployProxy(marketplaceFactory);
-    // await marketPlace.deployed();
+    const marketplaceFactory = await ethers.getContractFactory("Marketplace");
+    const marketPlace = await upgrades.deployProxy(marketplaceFactory);
+    await marketPlace.deployed();
+
+    console.log("Marketplace token deployed to:", marketPlace.address);
+
+    // const v2 = await ethers.getContractFactory("Marketplace");
+    // await upgrades.upgradeProxy('0xbb8910AB797d2860026BF221d268348ECEE27D0A', v2);
     //
-    // console.log("Marketplace token deployed to:", marketPlace.address);
-
-    const v2 = await ethers.getContractFactory("Marketplace");
-    await upgrades.upgradeProxy('0xbb8910AB797d2860026BF221d268348ECEE27D0A', v2);
-
-    console.log('Contract upgraded');
+    // console.log('Contract upgraded');
 }
 
 async function main() {
@@ -71,9 +71,9 @@ async function main() {
     // await HenHouse();
     // await Egg();
     // await ICO();
-    // await NFT("Black Hen", "BlackHEN");
+    // await NFT();
     // await Summoner();
-    await Marketplace();
+    // await Marketplace();
 }
 
 // We recommend this pattern to be able to use async/await everywhere-

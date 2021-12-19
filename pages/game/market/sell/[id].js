@@ -7,6 +7,7 @@ import marketJson from "../../../../artifacts/contracts/Marketplace.sol/Marketpl
 import {useRouter} from "next/router";
 import {walletState} from "../../../../states/walletState";
 import BackButton from "../../../../components/Utils/BackButton";
+import {henName} from "../../../../utils/henName";
 
 const SellHen = (props) => {
     const router = useRouter();
@@ -27,15 +28,17 @@ const SellHen = (props) => {
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
     let market = new web3.eth.Contract(marketJson.abi, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS);
 
-    const approve = async function() {
-        await nft.methods.setApprovalForAll(process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS, true).send({from: selectedAccount}).then((r) => {
+    const setApprovalForAll = async function () {
+        await nft.methods.setApprovalForAll(
+            process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS,
+            true
+        ).send({from: selectedAccount}).then((r) => {
             console.log(r);
         });
     };
 
     const submitForm = async (event) => {
         event.preventDefault();
-        console.log(event);
 
         await market.methods.createMarketItem(
             process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS,
@@ -48,7 +51,11 @@ const SellHen = (props) => {
 
     useEffect(async () => {
         if (selectedAccount) {
-            await nft.methods.isApprovedForAll(selectedAccount, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS).call().then((r) => setApprovedForAll(r));
+            await nft.methods.isApprovedForAll(
+                selectedAccount,
+                process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS
+            ).call().then((r) => setApprovedForAll(r));
+
             await nft.methods.getHenDetail(id).call().then((henDetail) => {
                 setHen({
                     id: id,
@@ -58,6 +65,7 @@ const SellHen = (props) => {
                     strength: henDetail.strength,
                     stamina: henDetail.stamina,
                     health: henDetail.health,
+                    genetic: henDetail.genetic,
                 });
             });
         }
@@ -82,7 +90,7 @@ const SellHen = (props) => {
                                 <Row>
                                     <Col xl={4}>
                                         <div className="card">
-                                            <img className="card-img-top img-fluid" src="/img/hen/black.jpg" alt="Hen"/>
+                                            <img className="card-img-top img-fluid" src={"/img/hen/" + hen.genetic + ".jpg"} alt="Hen"/>
                                         </div>
                                     </Col>
                                     <Col xl={4}>
@@ -127,12 +135,11 @@ const SellHen = (props) => {
                                     <Col xl={4}>
                                         <Form onSubmit={submitForm}>
                                             Informe o valor
-                                            <input type="text" name={"price"} className={"form-control mb-3"} />
+                                            <input type="text" name={"price"} className={"form-control mb-3"}/>
                                             {isApprovedForAll ?
                                                 <Button type="submit">Colocar à venda</Button> :
-                                                <Button onClick={approve}>Aprovar</Button> }
+                                                <Button onClick={setApprovalForAll}>Aprovar</Button>}
                                         </Form>
-
                                     </Col>
                                 </Row>
                             </CardBody>

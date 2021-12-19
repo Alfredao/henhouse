@@ -14,6 +14,8 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
     CountersUpgradeable.Counter private _tokenIdCounter;
     uint initialNumber;
 
+    enum HenGenetic{BLACK, WHITE, BROWN}
+
     struct HenAttr {
         uint8 level;
         uint8 productivity;
@@ -21,6 +23,7 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
         uint8 strength;
         uint8 stamina;
         uint8 health;
+        HenGenetic genetic;
     }
 
     mapping(uint256 => HenAttr) private _tokenDetails;
@@ -41,14 +44,26 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
     function safeMint(address to) public onlyRole(MINTER_ROLE) returns (uint256) {
         uint256 tokenId = _tokenIdCounter.current();
 
+        HenGenetic henGenetic;
+
+        uint8 randomGen = random(3);
+        if (randomGen == 1) {
+            henGenetic = HenGenetic.BLACK;
+        } else if (randomGen == 2) {
+            henGenetic = HenGenetic.WHITE;
+        } else if (randomGen == 3) {
+            henGenetic = HenGenetic.BROWN;
+        }
+
         // Elaborar lógica de criar esses atributos de forma aleatória
         _tokenDetails[tokenId] = HenAttr(
             1, // level
-            random(), // productivity
-            random(), // endurance
-            random(), // strength
-            random(), // stamina
-            random() // health
+            random(99), // productivity
+            random(99), // endurance
+            random(99), // strength
+            random(99), // stamina
+            random(99), // health
+            henGenetic
         );
 
         _tokenIdCounter.increment();
@@ -82,8 +97,8 @@ contract Hen is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, Acc
         return result;
     }
 
-    function random() private returns (uint8) {
-        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, initialNumber++))) % 99) + 1;
+    function random(uint8 max) private returns (uint8) {
+        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, initialNumber++))) % max) + 1;
     }
 
     // The following functions are overrides required by Solidity.

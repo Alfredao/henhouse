@@ -7,6 +7,7 @@ import {walletState} from "../../states/walletState";
 import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json";
 import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json";
 import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json";
+import {henName} from "../../utils/henName";
 
 const OpenEgg = (props) => {
 
@@ -82,10 +83,10 @@ const OpenEgg = (props) => {
             </Container>
             <Modal toggle={() => setModalOpen(!modalOpen)} isOpen={modalOpen}>
                 <div className=" modal-header">
-                    <h1 className=" modal-title" id="exampleModalLabel">GALINHA PRETA</h1>
+                    <h1 className=" modal-title" id="exampleModalLabel">{henName(hen.genetic)}</h1>
                 </div>
                 <ModalBody>
-                    <img src="/img/hen/black.jpg" alt="hen" className={"img-fluid"}/>
+                    <img src={"/img/hen/" + hen.genetic + ".jpg"} alt="hen" className={"img-fluid"}/>
                     <hr/>
                     <div className="d-flex justify-content-between align-items-center mt-3 mb-3">
                         <span className={"mr-2"}><strong>P /</strong> {hen.productivity}</span>

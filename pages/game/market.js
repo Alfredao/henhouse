@@ -9,6 +9,7 @@ import {faArrowUp, faDollarSign} from '@fortawesome/free-solid-svg-icons'
 import {useRouter} from "next/router";
 import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json";
 import marketJson from "../../artifacts/contracts/Marketplace.sol/Marketplace.json";
+import {henName} from "../../utils/henName";
 
 const Market = (props) => {
 
@@ -50,6 +51,7 @@ const Market = (props) => {
                             strength: henDetail.strength,
                             stamina: henDetail.stamina,
                             health: henDetail.health,
+                            genetic: henDetail.genetic,
                         }
                     };
                 });
@@ -79,17 +81,11 @@ const Market = (props) => {
                                     {items.map((item, i) => <div className="col-md-3">
                                         <div className="card mb-4 box-shadow">
                                             <img className="card-img-top" style={{height: '300px', width: '100%', display: 'block'}}
-                                                 src="/img/hen/black.jpg"
+                                                 src={"/img/hen/" + item.hen.genetic + ".jpg"}
                                                  data-holder-rendered="true"
-                                                 // onClick={() => {
-                                                 //     router.push({
-                                                 //         pathname: '/game/hen/[id]',
-                                                 //         query: {id: hen.id},
-                                                 //     })
-                                                 // }}
                                             />
                                             <div className="card-body">
-                                                <h3>GALINHA PRETA <small className={"text-muted mt-1 float-right"}> Level {item.hen.level}</small></h3>
+                                                <h3>{henName(item.hen.genetic)} <small className={"text-muted mt-1 float-right"}> Level {item.hen.level}</small></h3>
                                                 <div className="d-flex justify-content-between align-items-center mt-3 mb-3">
                                                     <span className={"mr-2"}><strong>P /</strong> {item.hen.productivity}</span>
                                                     <span className={"mr-2"}><strong>R /</strong> {item.hen.endurance}</span>

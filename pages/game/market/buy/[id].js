@@ -2,20 +2,22 @@ import React, {useEffect} from "react";
 import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
+import {useRouter} from "next/router";
+import BackButton from "../../../../components/Utils/BackButton";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCheck, faDollarSign} from "@fortawesome/free-solid-svg-icons";
+import {walletState} from "../../../../states/walletState";
 import nftJson from "../../../../artifacts/contracts/Hen.sol/Hen.json";
 import marketJson from "../../../../artifacts/contracts/Marketplace.sol/Marketplace.json";
-import {useRouter} from "next/router";
-import {walletState} from "../../../../states/walletState";
-import BackButton from "../../../../components/Utils/BackButton";
 import tokenJson from "../../../../artifacts/contracts/HenHouse.sol/HenHouse.json";
-import {faCheck, faDollarSign} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const SellHen = (props) => {
+
     const router = useRouter();
     const {id} = router.query;
     const {selectedAccount, web3} = walletState();
     const [allowance, setAllowance] = React.useState(0);
+
     const [hen, setHen] = React.useState({
         id: undefined,
         level: undefined,
@@ -45,7 +47,7 @@ const SellHen = (props) => {
 
             await getAllowance();
 
-            await market.methods.getDetail(id).call().then((marketItem) => {
+            await market.methods.getDetail(id).call().then(async marketItem => {
                 setMarketItem({
                     itemId: marketItem.itemId,
                     nftContract: marketItem.nftContract,
@@ -55,17 +57,18 @@ const SellHen = (props) => {
                     soldTo: marketItem.soldTo,
                     tokenId: marketItem.tokenId
                 });
-            });
 
-            await nft.methods.getHenDetail(id).call().then((henDetail) => {
-                setHen({
-                    id: id,
-                    level: henDetail.level,
-                    productivity: henDetail.productivity,
-                    endurance: henDetail.endurance,
-                    strength: henDetail.strength,
-                    stamina: henDetail.stamina,
-                    health: henDetail.health,
+                await nft.methods.getHenDetail(marketItem.tokenId).call().then(henDetail => {
+                    setHen({
+                        id: id,
+                        level: henDetail.level,
+                        productivity: henDetail.productivity,
+                        endurance: henDetail.endurance,
+                        strength: henDetail.strength,
+                        stamina: henDetail.stamina,
+                        health: henDetail.health,
+                        genetic: henDetail.genetic,
+                    });
                 });
             });
         }
@@ -109,12 +112,9 @@ const SellHen = (props) => {
                             </CardHeader>
                             <CardBody>
                                 <Row>
-                                    <Col className={"mb-5"} xl={12}>{JSON.stringify(marketItem)}</Col>
-                                </Row>
-                                <Row>
                                     <Col xl={4}>
                                         <div className="card">
-                                            <img className="card-img-top img-fluid" src="/img/hen/black.jpg" alt="Hen"/>
+                                            <img className="card-img-top img-fluid" src={"/img/hen/" + hen.genetic + ".jpg"} alt="Hen"/>
                                         </div>
                                     </Col>
                                     <Col xl={4}>
