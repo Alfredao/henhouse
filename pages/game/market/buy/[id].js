@@ -10,6 +10,7 @@ import {walletState} from "../../../../states/walletState";
 import nftJson from "../../../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import marketJson from "../../../../artifacts/contracts/Marketplace.sol/Marketplace.json";
 import tokenJson from "../../../../artifacts/contracts/HenToken.sol/HenToken.json";
+import {ProgressBar} from "react-bootstrap";
 
 const SellHen = (props) => {
 
@@ -122,37 +123,27 @@ const SellHen = (props) => {
                                             <li className="list-group-item">
                                                 <span className="attrName">Produtividade</span>
                                                 <span className="attrName float-right">{hen.productivity}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.productivity}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.productivity} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Resistência</span>
                                                 <span className="attrName float-right">{hen.endurance}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.endurance}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.endurance} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Força</span>
                                                 <span className="attrName float-right">{hen.strength}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.strength}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.strength} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Energia</span>
                                                 <span className="attrName float-right">{hen.stamina}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.stamina}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.stamina} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Saúde</span>
                                                 <span className="attrName float-right">{hen.health}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.health}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.health} />
                                             </li>
                                         </ul>
                                     </Col>

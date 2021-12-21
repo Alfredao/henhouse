@@ -51,6 +51,7 @@ const Houses = (props) => {
                             </CardHeader>
                             <CardBody>
                                 <Row>
+                                    {houses.length === 0 ? 'Nenhum galinheiro disponível' : ''}
                                     {houses.map((house) => <div className="col-md-3">
                                         <div className="card mb-4 box-shadow">
                                             <img className="card-img-top" style={{height: '200px', width: '100%', display: 'block'}}

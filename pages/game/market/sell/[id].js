@@ -2,17 +2,18 @@ import React, {useEffect} from "react";
 import {Button, Card, CardBody, CardHeader, Col, Container, Form, Row,} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
-import nftJson from "../../../../artifacts/contracts/Hen.sol/Hen.json";
+import nftJson from "../../../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import marketJson from "../../../../artifacts/contracts/Marketplace.sol/Marketplace.json";
 import {useRouter} from "next/router";
 import {walletState} from "../../../../states/walletState";
 import BackButton from "../../../../components/Utils/BackButton";
-import {henName} from "../../../../utils/henName";
+import {ProgressBar} from "react-bootstrap";
 
 const SellHen = (props) => {
     const router = useRouter();
     const {id} = router.query;
     const {selectedAccount, web3} = walletState();
+
     const [hen, setHen] = React.useState({
         id: undefined,
         level: undefined,
@@ -98,37 +99,27 @@ const SellHen = (props) => {
                                             <li className="list-group-item">
                                                 <span className="attrName">Produtividade</span>
                                                 <span className="attrName float-right">{hen.productivity}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.productivity}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.productivity} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Resistência</span>
                                                 <span className="attrName float-right">{hen.endurance}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.endurance}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.endurance} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Força</span>
                                                 <span className="attrName float-right">{hen.strength}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.strength}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.strength} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Energia</span>
                                                 <span className="attrName float-right">{hen.stamina}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.stamina}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.stamina} />
                                             </li>
                                             <li className="list-group-item">
                                                 <span className="attrName">Saúde</span>
                                                 <span className="attrName float-right">{hen.health}</span>
-                                                <div className="progress">
-                                                    <div className="progress-bar" role="progressbar" style={{width: `${hen.health}%`}}/>
-                                                </div>
+                                                <ProgressBar now={hen.health} />
                                             </li>
                                         </ul>
                                     </Col>

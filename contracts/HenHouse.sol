@@ -7,11 +7,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "./HenToken.sol";
+import "./HenNFT.sol";
 
 contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _houseIds;
+    CountersUpgradeable.Counter private _workIds;
+    HenNFT private _hen;
     HenToken private _henToken;
 
     struct House {
@@ -20,7 +23,14 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         uint8 minProductivity;
     }
 
+    struct Work {
+        uint houseId;
+        uint tokenId;
+        uint blockNumber;
+    }
+
     mapping(uint256 => House) private houses;
+    mapping(uint256 => Work) private works;
 
     event HouseCreated (
         uint indexed houseId,
@@ -39,10 +49,21 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
 
         uint256 houseId = _houseIds.current();
 
-        // create work item
         houses[houseId] = House(houseId, minLevel, minProductivity);
 
         emit HouseCreated(houseId, minLevel, minProductivity);
+    }
+
+    /* Create new houses */
+    function startWork(uint256 houseId, uint256 tokenId) public  {
+        _workIds.increment();
+
+        uint256 workId = _workIds.current();
+
+        // transfer nft own from contract to buyer
+        IERC721Upgradeable(_hen).transferFrom(msg.sender, address(this), tokenId);
+
+        works[workId] = Work(houseId, tokenId, block.number);
     }
 
     /* Returns all houses */
@@ -71,21 +92,23 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         return houses[houseId];
     }
 
-    /**
-     * Get hen token
-     *
-     * @return HenToken
-     */
+    function getWork(uint256 workId) public view returns (Work memory) {
+        return works[workId];
+    }
+
     function getHenToken() external view returns (HenToken) {
         return _henToken;
     }
 
-    /**
-     * Set hen token
-     *
-     * @param henToken The Hen House governance  token
-     */
     function setHenToken(HenToken henToken) onlyOwner external {
         _henToken = henToken;
+    }
+
+    function getHen() external view returns (HenNFT) {
+        return _hen;
+    }
+
+    function setHen(HenNFT hen) onlyOwner external {
+        _hen = hen;
     }
 }

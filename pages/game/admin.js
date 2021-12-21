@@ -81,7 +81,25 @@ const Admin = (props) => {
     };
 
     const createHenHouse = async function () {
+        await house.methods.createHouse(1, 50).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+
+        await house.methods.createHouse(2, 61).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+
+        await house.methods.createHouse(3, 61).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+
         await house.methods.createHouse(4, 61).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setHouseHen = async function () {
+        await house.methods.setHen(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -106,7 +124,7 @@ const Admin = (props) => {
                                     <Row className="align-self-center w-100">
                                         <div className="col-6 mx-auto">
                                             <div className="jumbotron">
-                                                <Button className="btn-lg btn-block" onClick={addWhitelistAddress}>Entrar na whitelist</Button>
+                                                {/*<Button className="btn-lg btn-block" onClick={addWhitelistAddress}>Entrar na whitelist</Button>*/}
                                                 <Button className="btn-lg btn-block" onClick={sendBNB}>Enviar 0.1 BNB</Button>
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={setHenToken}>Definir moeda do ICO</Button>
@@ -120,6 +138,7 @@ const Admin = (props) => {
                                                 <Button className="btn-lg btn-block" onClick={setMarketToken}>Definir moeda do market</Button>
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={createHenHouse}>Criar galinheiro</Button>
+                                                <Button className="btn-lg btn-block" onClick={setHouseHen}>Definir galinhas do galinheiro</Button>
                                             </div>
                                         </div>
                                     </Row>
