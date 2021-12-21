@@ -3,25 +3,25 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./Hen.sol";
-import "./HenHouse.sol";
+import "./HenNFT.sol";
+import "./HenToken.sol";
 
 contract HenSummoner is Initializable, OwnableUpgradeable {
 
-    Hen private _hen;
-    HenHouse private _henHouse;
+    HenNFT private _hen;
+    HenToken private _henToken;
     uint256 private _summonPrice;
 
-    event NewHen(address indexed owner, Hen hen, uint256 tokenId);
+    event NewHen(address indexed owner, HenNFT hen, uint256 tokenId);
 
     function initialize() initializer public {
         __Ownable_init();
     }
 
     function summon() public {
-        uint256 tokenId = Hen(_hen).safeMint(msg.sender);
+        uint256 tokenId = HenNFT(_hen).safeMint(msg.sender);
 
-        HenHouse(_henHouse).spend(msg.sender, _summonPrice);
+        HenToken(_henToken).spend(msg.sender, _summonPrice);
 
         emit NewHen(msg.sender, _hen, tokenId);
     }
@@ -34,19 +34,19 @@ contract HenSummoner is Initializable, OwnableUpgradeable {
         _summonPrice = summonPrice;
     }
 
-    function getHenToken() external view returns (HenHouse) {
-        return _henHouse;
+    function getHenToken() external view returns (HenToken) {
+        return _henToken;
     }
 
-    function setHenToken(HenHouse henHouse) onlyOwner external {
-        _henHouse = henHouse;
+    function setHenToken(HenToken henToken) onlyOwner external {
+        _henToken = henToken;
     }
 
-    function getHen() external view returns (Hen) {
+    function getHen() external view returns (HenNFT) {
         return _hen;
     }
 
-    function setHen(Hen hen) onlyOwner external {
+    function setHen(HenNFT hen) onlyOwner external {
         _hen = hen;
     }
 }

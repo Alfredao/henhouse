@@ -2,7 +2,7 @@ import React, {useEffect} from "react";
 import {Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
-import nftJson from "../../../artifacts/contracts/Hen.sol/Hen.json";
+import nftJson from "../../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import {useRouter} from "next/router";
 import {walletState} from "../../../states/walletState";
 import BackButton from "../../../components/Utils/BackButton";

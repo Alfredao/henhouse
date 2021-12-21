@@ -1,34 +1,91 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "./HenToken.sol";
 
-contract HenHouse is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, AccessControlUpgradeable {
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+
+    CountersUpgradeable.Counter private _houseIds;
+    HenToken private _henToken;
+
+    struct House {
+        uint houseId;
+        uint8 minLevel;
+        uint8 minProductivity;
+    }
+
+    mapping(uint256 => House) private houses;
+
+    event HouseCreated (
+        uint indexed houseId,
+        uint8 minLevel,
+        uint8 minProductivity
+    );
 
     function initialize() initializer public {
-        __ERC20_init("Hen House", "HEN");
-        __ERC20Burnable_init();
-        __AccessControl_init();
-
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, msg.sender);
+        __Ownable_init();
+        __ReentrancyGuard_init_unchained();
     }
 
-    function grantRole(address to, bytes32 role) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(role, to);
+    /* Create new houses */
+    function createHouse(uint8 minLevel, uint8 minProductivity) public onlyOwner {
+        _houseIds.increment();
+
+        uint256 houseId = _houseIds.current();
+
+        // create work item
+        houses[houseId] = House(houseId, minLevel, minProductivity);
+
+        emit HouseCreated(houseId, minLevel, minProductivity);
     }
 
-    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
-        _mint(to, amount);
+    /* Returns all houses */
+    function getAllHouses() public view returns (House[] memory) {
+        uint count = _houseIds.current();
+
+        if (count == 0) {
+            return new House[](0);
+        }
+
+        House[] memory items = new House[](count);
+
+        uint currentIndex = 0;
+        for (uint i = 0; i < count; i++) {
+            uint currentId = i + 1;
+            House storage currentItem = houses[currentId];
+            items[currentIndex] = currentItem;
+            currentIndex += 1;
+        }
+
+        return items;
     }
 
-    function spend(address from, uint256 value) public returns (bool) {
-        _burn(from, value);
+    /* Get details from house item */
+    function getDetail(uint256 houseId) public view returns (House memory) {
+        return houses[houseId];
+    }
 
-        return true;
+    /**
+     * Get hen token
+     *
+     * @return HenToken
+     */
+    function getHenToken() external view returns (HenToken) {
+        return _henToken;
+    }
+
+    /**
+     * Set hen token
+     *
+     * @param henToken The Hen House governance  token
+     */
+    function setHenToken(HenToken henToken) onlyOwner external {
+        _henToken = henToken;
     }
 }

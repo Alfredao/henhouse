@@ -58,6 +58,19 @@ async function Marketplace() {
     // console.log('Contract upgraded');
 }
 
+async function House() {
+    // const houseFactory = await ethers.getContractFactory("HenHouse");
+    // const house = await upgrades.deployProxy(houseFactory);
+    // await house.deployed();
+    //
+    // console.log("House token deployed to:", house.address);
+
+    const v2 = await ethers.getContractFactory("HenHouse");
+    await upgrades.upgradeProxy('0xadE9042237C69786999e2279971Cc4d91382eA9c', v2);
+
+    console.log('Contract upgraded');
+}
+
 async function main() {
     // Hardhat always runs the compile task when running scripts with its command
     // line interface.
@@ -74,6 +87,7 @@ async function main() {
     // await NFT();
     // await Summoner();
     // await Marketplace();
+    await House();
 }
 
 // We recommend this pattern to be able to use async/await everywhere-

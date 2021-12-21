@@ -7,9 +7,9 @@ import BackButton from "../../../../components/Utils/BackButton";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faDollarSign} from "@fortawesome/free-solid-svg-icons";
 import {walletState} from "../../../../states/walletState";
-import nftJson from "../../../../artifacts/contracts/Hen.sol/Hen.json";
+import nftJson from "../../../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import marketJson from "../../../../artifacts/contracts/Marketplace.sol/Marketplace.json";
-import tokenJson from "../../../../artifacts/contracts/HenHouse.sol/HenHouse.json";
+import tokenJson from "../../../../artifacts/contracts/HenToken.sol/HenToken.json";
 
 const SellHen = (props) => {
 
@@ -159,11 +159,11 @@ const SellHen = (props) => {
                                     <Col xl={4}>
                                         <h2>Preço: {web3.utils.fromWei(web3.utils.toBN(marketItem.price), "ether")} HEN</h2>
                                         {marketItem.seller === selectedAccount ? "" :
-                                        <>
-                                            {parseInt(allowance.toString()) > parseInt(marketItem.price) ?
-                                            <Button onClick={buyItem}><FontAwesomeIcon icon={faDollarSign}/> Comprar</Button> :
-                                            <Button onClick={approveToken}><FontAwesomeIcon icon={faCheck}/> Autorizar contrato</Button>}
-                                        </>}
+                                            <>
+                                                {parseInt(allowance.toString()) > parseInt(marketItem.price) ?
+                                                    <Button onClick={buyItem}><FontAwesomeIcon icon={faDollarSign}/> Comprar</Button> :
+                                                    <Button onClick={approveToken}><FontAwesomeIcon icon={faCheck}/> Autorizar contrato</Button>}
+                                            </>}
                                     </Col>
                                 </Row>
                             </CardBody>

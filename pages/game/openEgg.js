@@ -4,9 +4,9 @@ import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 import {walletState} from "../../states/walletState";
 
-import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json";
+import tokenJson from "../../artifacts/contracts/HenToken.sol/HenToken.json";
 import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json";
-import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json";
+import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import {henName} from "../../utils/henName";
 
 const OpenEgg = (props) => {

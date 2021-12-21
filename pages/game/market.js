@@ -7,7 +7,7 @@ import Web3 from "web3";
 import {walletState} from "../../states/walletState";
 import {faArrowUp, faDollarSign} from '@fortawesome/free-solid-svg-icons'
 import {useRouter} from "next/router";
-import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json";
+import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import marketJson from "../../artifacts/contracts/Marketplace.sol/Marketplace.json";
 import {henName} from "../../utils/henName";
 
@@ -25,9 +25,7 @@ const Market = (props) => {
     useEffect(async () => {
         if (selectedAccount) {
             const data = await market.methods.fetchMarketItems().call();
-
             const items = await Promise.all(data.map(async marketItem => {
-
                 const marketDetail = await market.methods.getDetail(marketItem.itemId).call().then((m) => {
                     return {
                         itemId: m.itemId,

@@ -5,11 +5,12 @@ import Header from "components/Headers/Header.js";
 import {walletState} from "../../states/walletState";
 import Web3 from "web3";
 
-import tokenJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
+import tokenJson from "../../artifacts/contracts/HenToken.sol/HenToken.json"
 import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json"
 import icoJson from "../../artifacts/contracts/HenHouseIco.sol/HenHouseIco.json"
-import nftJson from "../../artifacts/contracts/Hen.sol/Hen.json"
+import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json"
 import marketJson from "../../artifacts/contracts/Marketplace.sol/Marketplace.json"
+import houseJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
 
 const Admin = (props) => {
 
@@ -21,6 +22,7 @@ const Admin = (props) => {
     let market = new web3.eth.Contract(marketJson.abi, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS);
     let ico = new web3.eth.Contract(icoJson.abi, process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS);
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
+    let house = new web3.eth.Contract(houseJson.abi, process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS);
 
     const setHenToken = async function () {
         await ico.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
@@ -78,6 +80,12 @@ const Admin = (props) => {
         }).then((r) => console.log(r));
     };
 
+    const createHenHouse = async function () {
+        await house.methods.createHouse(4, 61).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
     return (
         <>
             <Header/>
@@ -110,6 +118,8 @@ const Admin = (props) => {
                                                 <Button className="btn-lg btn-block" onClick={grantRoleMintNft}>Garantir permissão de summon</Button>
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={setMarketToken}>Definir moeda do market</Button>
+                                                <hr/>
+                                                <Button className="btn-lg btn-block" onClick={createHenHouse}>Criar galinheiro</Button>
                                             </div>
                                         </div>
                                     </Row>

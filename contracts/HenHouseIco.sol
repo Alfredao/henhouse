@@ -5,11 +5,11 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./HenHouse.sol";
+import "./HenToken.sol";
 
 contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
-    HenHouse private _henHouse;
+    HenToken private _henToken;
     mapping(address => bool) whitelist;
     uint256 private _releaseTime;
 
@@ -51,25 +51,25 @@ contract HenHouseIco is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         require(beneficiary != address(0));
         require(weiAmount != 0);
 
-        HenHouse(_henHouse).mint(beneficiary, weiAmount);
+        HenToken(_henToken).mint(beneficiary, weiAmount);
     }
 
     /**
      * Get hen token
      *
-     * @return HenHouse
+     * @return HenToken
      */
-    function getHenToken() external view returns (HenHouse) {
-        return _henHouse;
+    function getHenToken() external view returns (HenToken) {
+        return _henToken;
     }
 
     /**
      * Set hen token
      *
-     * @param henHouse The Hen House governance  token
+     * @param henToken The Hen House governance  token
      */
-    function setHenToken(HenHouse henHouse) onlyOwner external {
-        _henHouse = henHouse;
+    function setHenToken(HenToken henToken) onlyOwner external {
+        _henToken = henToken;
     }
 
     function addWhitelistAddress(address _address) public onlyOwner {

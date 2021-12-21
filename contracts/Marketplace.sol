@@ -6,14 +6,16 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import "./HenHouse.sol";
+import "./HenNFT.sol";
+import "./HenToken.sol";
 
 contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _itemIds;
     CountersUpgradeable.Counter private _itemsSold;
-    HenHouse private _henHouse;
+    HenNFT private _hen;
+    HenToken private _henToken;
 
     struct MarketItem {
         uint itemId;
@@ -43,7 +45,7 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     }
 
     /* Places an item for sale on the marketplace */
-    function createMarketItem(address nftContract, uint256 tokenId, uint256 price) public payable nonReentrant {
+    function createMarketItem(address nftContract, uint256 tokenId, uint256 price) public nonReentrant {
         require(price > 0, "Price must be at least 1 wei");
 
         _itemIds.increment();
@@ -61,7 +63,7 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
 
     /* Creates the sale of a marketplace item */
     /* Transfers ownership of the item, as well as funds between parties */
-    function createMarketSale(address nftContract, uint256 itemId) public payable nonReentrant {
+    function createMarketSale(address nftContract, uint256 itemId) public nonReentrant {
         uint price = marketItem[itemId].price;
         uint tokenId = marketItem[itemId].tokenId;
         bool sold = marketItem[itemId].sold;
@@ -74,7 +76,7 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         IERC721Upgradeable(nftContract).safeTransferFrom(address(this), msg.sender, tokenId);
 
         // transfer price from owner token balance to seller
-        HenHouse(_henHouse).transferFrom(msg.sender, payable(seller), price);
+        HenToken(_henToken).transferFrom(msg.sender, payable(seller), price);
 
         marketItem[itemId].soldTo = payable(msg.sender);
         marketItem[itemId].sold = true;
@@ -114,18 +116,18 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     /**
      * Get hen token
      *
-     * @return HenHouse
+     * @return HenToken
      */
-    function getHenToken() external view returns (HenHouse) {
-        return _henHouse;
+    function getHenToken() external view returns (HenToken) {
+        return _henToken;
     }
 
     /**
      * Set hen token
      *
-     * @param henHouse The Hen House governance  token
+     * @param henToken The Hen House governance  token
      */
-    function setHenToken(HenHouse henHouse) onlyOwner external {
-        _henHouse = henHouse;
+    function setHenToken(HenToken henToken) onlyOwner external {
+        _henToken = henToken;
     }
 }
