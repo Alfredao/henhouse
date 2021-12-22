@@ -65,8 +65,9 @@ async function House() {
     //
     // console.log("House token deployed to:", house.address);
 
+
     const v2 = await ethers.getContractFactory("HenHouse");
-    await upgrades.upgradeProxy('0x6498eeEd3154ec8696840d80aBf3B39F0e093aeB', v2);
+    await upgrades.upgradeProxy('0x84AAA1F1e4768AdD08f6E5dE47518e749794f03B', v2);
 
     console.log('Contract upgraded');
 }

@@ -6,6 +6,7 @@ import {walletState} from "../../states/walletState";
 import Web3 from "web3";
 
 import tokenJson from "../../artifacts/contracts/HenToken.sol/HenToken.json"
+import eggJson from "../../artifacts/contracts/EggToken.sol/EggToken.json"
 import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.json"
 import icoJson from "../../artifacts/contracts/HenHouseIco.sol/HenHouseIco.json"
 import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json"
@@ -18,6 +19,7 @@ const Admin = (props) => {
     const web3 = new Web3(provider);
 
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
+    let egg = new web3.eth.Contract(eggJson.abi, process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS);
     let summoner = new web3.eth.Contract(summonerJson.abi, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS);
     let market = new web3.eth.Contract(marketJson.abi, process.env.NEXT_PUBLIC_MARKET_CONTRACT_ADDRESS);
     let ico = new web3.eth.Contract(icoJson.abi, process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS);
@@ -32,12 +34,6 @@ const Admin = (props) => {
 
     const grantRoleMintIco = async function () {
         await token.methods.grantRole(process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
-            from: selectedAccount
-        }).then((r) => console.log(r));
-    };
-
-    const addWhitelistAddress = async function () {
-        await ico.methods.addWhitelistAddress(selectedAccount).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -104,6 +100,18 @@ const Admin = (props) => {
         }).then((r) => console.log(r));
     };
 
+    const setEggToken = async function () {
+        await house.methods.setEggToken(process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const grantRoleMintEggWorker = async function () {
+        await egg.methods.grantRole(process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
     return (
         <>
             <Header/>
@@ -139,6 +147,8 @@ const Admin = (props) => {
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={createHenHouse}>Criar galinheiro</Button>
                                                 <Button className="btn-lg btn-block" onClick={setHouseHen}>Definir galinhas do galinheiro</Button>
+                                                <Button className="btn-lg btn-block" onClick={setEggToken}>Definir moeda de recomensa (ovos)</Button>
+                                                <Button className="btn-lg btn-block" onClick={grantRoleMintEggWorker}>Garantir permissão de coletar ovos</Button>
                                             </div>
                                         </div>
                                     </Row>

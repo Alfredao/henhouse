@@ -18,6 +18,8 @@ const House = (props) => {
     const [isApprovedForAll, setApprovedForAll] = React.useState(false);
     const [henHouse, setHenHouse] = React.useState([]);
     const [items, setItems] = React.useState([]);
+    const [works, setWorks] = React.useState([]);
+    const [blockNumber, setBlockNumber] = React.useState(0);
 
     const web3 = new Web3(provider);
 
@@ -26,9 +28,7 @@ const House = (props) => {
 
     useEffect(async () => {
 
-        await house.methods.getWork(1).call().then(h => {
-            console.log(h);
-        });
+        await web3.eth.getBlockNumber().then((r => setBlockNumber(r)));
 
         await nft.methods.isApprovedForAll(
             selectedAccount,
@@ -43,9 +43,8 @@ const House = (props) => {
             })
         });
 
-        const data = await nft.methods.getHenByUser(selectedAccount).call();
-
-        const myHens = await Promise.all(data.map(async i => {
+        const myHensData = await nft.methods.getHenByUser(selectedAccount).call();
+        setItems(await Promise.all(myHensData.map(async i => {
             return await nft.methods.getHenDetail(i).call().then((henDetail) => {
                 return {
                     id: i,
@@ -58,9 +57,40 @@ const House = (props) => {
                     genetic: henDetail.genetic,
                 };
             });
+        })));
+
+        const myWorksData = await house.methods.getMyWorks(id, selectedAccount).call();
+        const myWorks = await Promise.all(myWorksData.map(async i => {
+            const henDetail = await nft.methods.getHenDetail(i.tokenId).call().then((henDetail) => {
+                return {
+                    id: i,
+                    level: henDetail.level,
+                    productivity: henDetail.productivity,
+                    endurance: henDetail.endurance,
+                    strength: henDetail.strength,
+                    stamina: henDetail.stamina,
+                    health: henDetail.health,
+                    genetic: henDetail.genetic,
+                };
+            });
+
+            let eggsEstimative = (henDetail.productivity - henHouse.minProductivity) * henDetail.level * (blockNumber - i.blockNumber);
+            if (isNaN(eggsEstimative) || eggsEstimative < 0) {
+                eggsEstimative = 0;
+            }
+
+            return {
+                workId: i.workId,
+                houseId: i.houseId,
+                tokenId: i.tokenId,
+                owner: i.owner,
+                blockNumber: i.blockNumber,
+                eggs: eggsEstimative,
+                henDetail: henDetail
+            };
         }));
 
-        setItems(myHens);
+        setWorks(myWorks);
     }, []);
 
     async function setApprovalForAll() {
@@ -68,6 +98,12 @@ const House = (props) => {
             process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS,
             true
         ).send({from: selectedAccount}).then((r) => {
+            console.log(r);
+        });
+    }
+
+    async function collectEggs(e) {
+        await house.methods.collectEggs(e.currentTarget.getAttribute("data-work")).send({from: selectedAccount}).then((r) => {
             console.log(r);
         });
     }
@@ -144,21 +180,23 @@ const House = (props) => {
                                         </tr>
                                         </thead>
                                         <tbody className="list">
-                                        <tr>
-                                            <td>Galinha preta</td>
-                                            <td>1</td>
-                                            <td>99</td>
-                                            <td>80</td>
-                                            <td>50</td>
-                                            <td>65</td>
-                                            <td>12</td>
-                                            <td>125.658</td>
-                                            <td>521</td>
-                                            <td>
-                                                <Button>Coletar ovos</Button>
-                                                <Button>Sair</Button>
-                                            </td>
-                                        </tr>
+                                        {works.map((work) =>
+                                            <tr>
+                                                <td>{henName(work.henDetail.genetic)}</td>
+                                                <td>{work.henDetail.level}</td>
+                                                <td>{work.henDetail.productivity}</td>
+                                                <td>{work.henDetail.endurance}</td>
+                                                <td>{work.henDetail.strength}</td>
+                                                <td>{work.henDetail.stamina}</td>
+                                                <td>{work.henDetail.health}</td>
+                                                <td>{work.blockNumber}</td>
+                                                <td>{work.eggs}</td>
+                                                <td>
+                                                    <Button onClick={collectEggs} data-work={work.workId}>Coletar ovos</Button>
+                                                    <Button>Sair</Button>
+                                                </td>
+                                            </tr>
+                                        )}
                                         </tbody>
                                     </Table>
                                 </Row>
