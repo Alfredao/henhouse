@@ -69,5 +69,8 @@
     "hardhat": "^2.7.0",
     "typescript": "^4.5.2",
     "url-loader": "^4.1.1"
-  }
+  },
+  "cacheDirectories": [
+    ".next/cache"
+  ]
 }
