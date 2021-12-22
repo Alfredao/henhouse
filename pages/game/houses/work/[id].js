@@ -14,12 +14,15 @@ import {FormSelect} from "react-bootstrap";
 const House = (props) => {
     const router = useRouter();
     const {id} = router.query;
-    const {provider, selectedAccount} = walletState();
+    const {provider, selectedAccount, blockNumber} = walletState();
     const [isApprovedForAll, setApprovedForAll] = React.useState(false);
-    const [henHouse, setHenHouse] = React.useState([]);
+    const [henHouse, setHenHouse] = React.useState({
+        houseId: undefined,
+        minLevel: 0,
+        minProductivity: 0,
+    });
     const [items, setItems] = React.useState([]);
     const [works, setWorks] = React.useState([]);
-    const [blockNumber, setBlockNumber] = React.useState(0);
 
     const web3 = new Web3(provider);
 
@@ -27,70 +30,69 @@ const House = (props) => {
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
     useEffect(async () => {
+        if (selectedAccount) {
+            await nft.methods.isApprovedForAll(
+                selectedAccount,
+                process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS
+            ).call().then((r) => setApprovedForAll(r));
 
-        await web3.eth.getBlockNumber().then((r => setBlockNumber(r)));
-
-        await nft.methods.isApprovedForAll(
-            selectedAccount,
-            process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS
-        ).call().then((r) => setApprovedForAll(r));
-
-        await house.methods.getDetail(id).call().then(h => {
-            setHenHouse({
-                houseId: h.houseId,
-                minLevel: h.minLevel,
-                minProductivity: h.minProductivity,
-            })
-        });
-
-        const myHensData = await nft.methods.getHenByUser(selectedAccount).call();
-        setItems(await Promise.all(myHensData.map(async i => {
-            return await nft.methods.getHenDetail(i).call().then((henDetail) => {
-                return {
-                    id: i,
-                    level: henDetail.level,
-                    productivity: henDetail.productivity,
-                    endurance: henDetail.endurance,
-                    strength: henDetail.strength,
-                    stamina: henDetail.stamina,
-                    health: henDetail.health,
-                    genetic: henDetail.genetic,
-                };
-            });
-        })));
-
-        const myWorksData = await house.methods.getMyWorks(id, selectedAccount).call();
-        const myWorks = await Promise.all(myWorksData.map(async i => {
-            const henDetail = await nft.methods.getHenDetail(i.tokenId).call().then((henDetail) => {
-                return {
-                    id: i,
-                    level: henDetail.level,
-                    productivity: henDetail.productivity,
-                    endurance: henDetail.endurance,
-                    strength: henDetail.strength,
-                    stamina: henDetail.stamina,
-                    health: henDetail.health,
-                    genetic: henDetail.genetic,
-                };
+            await house.methods.getDetail(id).call().then(h => {
+                setHenHouse({
+                    houseId: h.houseId,
+                    minLevel: h.minLevel,
+                    minProductivity: h.minProductivity,
+                })
             });
 
-            let eggsEstimative = (henDetail.productivity - henHouse.minProductivity) * henDetail.level * (blockNumber - i.blockNumber);
-            if (isNaN(eggsEstimative) || eggsEstimative < 0) {
-                eggsEstimative = 0;
-            }
+            const myHensData = await nft.methods.getHenByUser(selectedAccount).call();
+            setItems(await Promise.all(myHensData.map(async i => {
+                return await nft.methods.getHenDetail(i).call().then((henDetail) => {
+                    return {
+                        id: i,
+                        level: henDetail.level,
+                        productivity: henDetail.productivity,
+                        endurance: henDetail.endurance,
+                        strength: henDetail.strength,
+                        stamina: henDetail.stamina,
+                        health: henDetail.health,
+                        genetic: henDetail.genetic,
+                    };
+                });
+            })));
 
-            return {
-                workId: i.workId,
-                houseId: i.houseId,
-                tokenId: i.tokenId,
-                owner: i.owner,
-                blockNumber: i.blockNumber,
-                eggs: eggsEstimative,
-                henDetail: henDetail
-            };
-        }));
+            const myWorksData = await house.methods.getMyWorks(id, selectedAccount).call();
+            const myWorks = await Promise.all(myWorksData.map(async i => {
+                const henDetail = await nft.methods.getHenDetail(i.tokenId).call().then((henDetail) => {
+                    return {
+                        id: i,
+                        level: henDetail.level,
+                        productivity: henDetail.productivity,
+                        endurance: henDetail.endurance,
+                        strength: henDetail.strength,
+                        stamina: henDetail.stamina,
+                        health: henDetail.health,
+                        genetic: henDetail.genetic,
+                    };
+                });
 
-        setWorks(myWorks);
+                let eggsEstimative = (henDetail.productivity - henHouse.minProductivity) * henDetail.level * (blockNumber - i.blockNumber);
+                if (eggsEstimative < 0) {
+                    eggsEstimative = 0;
+                }
+
+                return {
+                    workId: i.workId,
+                    houseId: i.houseId,
+                    tokenId: i.tokenId,
+                    owner: i.owner,
+                    blockNumber: i.blockNumber,
+                    eggs: eggsEstimative,
+                    henDetail: henDetail
+                };
+            }));
+
+            setWorks(myWorks);
+        }
     }, []);
 
     async function setApprovalForAll() {

@@ -121,6 +121,12 @@ function Wallet() {
         const web3 = new Web3(provider);
         walletState.setState({web3: web3});
 
+        await web3.eth.getBlockNumber(function (error, result) {
+            if (!error) {
+                walletState.setState({blockNumber: result});
+            }
+        });
+
         // Get connected chain id from Ethereum node
         const chainId = await web3.eth.getChainId();
         walletState.setState({network: chainId});

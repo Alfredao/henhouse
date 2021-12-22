@@ -10,6 +10,7 @@ export const walletState = create(set => ({
     contracts: {
 
     },
+    blockNumber : 0,
     clearAccountData: function () {
         this.balances = {};
         this.selectedAccount = undefined;
