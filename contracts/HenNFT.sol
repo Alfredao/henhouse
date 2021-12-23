@@ -72,6 +72,14 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
         return tokenId;
     }
 
+    function levelUp(uint256 tokenId) public {
+        uint8 level = _tokenDetails[tokenId].level;
+
+        uint8 newLevel = level + 1;
+
+        _tokenDetails[tokenId].level = newLevel;
+    }
+
     function getHenDetail(uint tokenId) public view returns (HenAttr memory) {
         return _tokenDetails[tokenId];
     }
