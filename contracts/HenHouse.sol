@@ -9,13 +9,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol"
 import "./HenToken.sol";
 import "./EggToken.sol";
 import "./HenNFT.sol";
-import "./HenNFT.sol";
 
 contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _houseIds;
     CountersUpgradeable.Counter private _workIds;
+
     HenNFT private _hen;
     HenToken private _henToken;
     EggToken private _eggToken;
@@ -152,7 +152,7 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
 
         HenNFT.HenAttr memory henAttr = HenNFT(_hen).getHenDetail(tokenId);
 
-        uint256 amount = 0.01 * (henAttr.productivity - houses[houseId].minProductivity) * henAttr.level * (block.number - blockNumber) * 1e18;
+        uint256 amount = (henAttr.productivity - houses[houseId].minProductivity) * henAttr.level * (block.number - blockNumber) * 1e18;
 
         EggToken(_eggToken).mint(msg.sender, amount);
 
