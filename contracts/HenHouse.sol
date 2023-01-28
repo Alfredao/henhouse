@@ -75,8 +75,8 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
 
         HenNFT.HenAttr memory henAttr = HenNFT(_hen).getHenDetail(tokenId);
 
-        require(henAttr.level >= houses[houseId].minLevel, "This hen does not meet the minimum level requirements");
-        require(henAttr.productivity >= houses[houseId].minProductivity, "This hen does not meet the minimum productivity requirements");
+        require(henAttr.level >= houses[houseId].minLevel, "The level of this hen must be greater than or equal to the minimum level requirement for the specified house");
+        require(henAttr.productivity >= houses[houseId].minProductivity, "The productivity of this hen must be greater than or equal to the minimum productivity requirement for the specified house");
 
         // transfer nft own from contract to buyer
         IERC721Upgradeable(_hen).transferFrom(msg.sender, address(this), tokenId);
@@ -148,7 +148,7 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         uint blockNumber = works[workId].blockNumber;
         uint houseId = works[workId].houseId;
 
-        require(owner == msg.sender, "You can only collect your own eggs");
+        require(owner == msg.sender, "Only the owner of this eggs can collect them");
 
         HenNFT.HenAttr memory henAttr = HenNFT(_hen).getHenDetail(tokenId);
 

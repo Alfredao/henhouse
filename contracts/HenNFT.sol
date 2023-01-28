@@ -55,7 +55,6 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
             henGenetic = HenGenetic.BROWN;
         }
 
-        // Elaborar lógica de criar esses atributos de forma aleatória
         _tokenDetails[tokenId] = HenAttr(
             1, // level
             random(99), // productivity
