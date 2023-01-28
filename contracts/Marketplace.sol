@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import "./HenNFT.sol";
 import "./HenToken.sol";
 
 contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
@@ -14,7 +13,6 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
 
     CountersUpgradeable.Counter private _itemIds;
     CountersUpgradeable.Counter private _itemsSold;
-    HenNFT private _hen;
     HenToken private _henToken;
 
     struct MarketItem {
@@ -113,20 +111,10 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         return marketItem[tokenId];
     }
 
-    /**
-     * Get hen token
-     *
-     * @return HenToken
-     */
     function getHenToken() external view returns (HenToken) {
         return _henToken;
     }
 
-    /**
-     * Set hen token
-     *
-     * @param henToken The Hen House governance  token
-     */
     function setHenToken(HenToken henToken) onlyOwner external {
         _henToken = henToken;
     }
