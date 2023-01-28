@@ -12,8 +12,21 @@ Just like in a real farm, the goal is to become the best farmer you can be by ta
 
 This game is a great way for kids to learn about the basics of farming, raising hens and collecting eggs in a fun and interactive way.
 
+---
+The formula for collecting eggs in this contract is determined by the following calculation:
+amount
 
-e = (b * p * l) * 0.00000001
+``eggs = (p - h) * l * (b - bn) * 1e18``
+
+Where:
+
+```
+p is the productivity of the hen
+h is the house productivity minimum that the hen is in
+l is the level of the hen
+b is the current block number
+bn is the block number when the work started
+```
 
 Getting Started
 ---------------
