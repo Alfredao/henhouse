@@ -3,14 +3,14 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./HenNFT.sol";
-import "./HenToken.sol";
 
 contract HenSummoner is Initializable, OwnableUpgradeable {
 
-    HenNFT private _hen;
-    HenToken private _henToken;
+    IERC20 private _token;
     uint256 private _summonPrice;
+    HenNFT[] _hens;
 
     event NewHen(address indexed owner, HenNFT hen, uint256 tokenId);
 
@@ -19,11 +19,21 @@ contract HenSummoner is Initializable, OwnableUpgradeable {
     }
 
     function summon() public {
+
+        require(_hens.length > 0, "Please make sure that the hens to mint is set before attempting to summon. There must be at least one hen available");
+
+        uint8 lucky = random(uint8(_hens.length - 1));
+
+        HenNFT _hen = HenNFT(_hens[lucky]);
         uint256 tokenId = HenNFT(_hen).safeMint(msg.sender);
 
-        HenToken(_henToken).spend(msg.sender, _summonPrice);
+        IERC20(_token).transferFrom(msg.sender, address(this), _summonPrice);
 
         emit NewHen(msg.sender, _hen, tokenId);
+    }
+
+    function random(uint8 max) private returns (uint8) {
+        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, initialNumber++))) % max) + 1;
     }
 
     function getSummonPrice() external view returns (uint256) {
@@ -34,19 +44,19 @@ contract HenSummoner is Initializable, OwnableUpgradeable {
         _summonPrice = summonPrice;
     }
 
-    function getHenToken() external view returns (HenToken) {
-        return _henToken;
+    function getToken() external view returns (IERC20) {
+        return _token;
     }
 
-    function setHenToken(HenToken henToken) onlyOwner external {
-        _henToken = henToken;
+    function setToken(IERC20 token) onlyOwner external {
+        _token = token;
     }
 
-    function getHen() external view returns (HenNFT) {
-        return _hen;
+    function getHens() external view returns (HenNFT[] memory) {
+        return _hens;
     }
 
-    function setHen(HenNFT hen) onlyOwner external {
-        _hen = hen;
+    function setHens(HenNFT[] memory hens) onlyOwner external {
+        _hens = hens;
     }
 }
