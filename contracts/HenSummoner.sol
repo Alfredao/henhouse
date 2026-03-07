@@ -19,9 +19,10 @@ contract HenSummoner is Initializable, OwnableUpgradeable {
     }
 
     function summon() public {
-        uint256 tokenId = HenNFT(_hen).safeMint(msg.sender);
-
+        // Spend tokens before minting to prevent minting if payment fails
         HenToken(_henToken).spend(msg.sender, _summonPrice);
+
+        uint256 tokenId = HenNFT(_hen).safeMint(msg.sender);
 
         emit NewHen(msg.sender, _hen, tokenId);
     }

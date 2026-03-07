@@ -33,7 +33,7 @@ const Admin = (props) => {
     };
 
     const grantRoleMintIco = async function () {
-        await token.methods.grantRole(process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
+        await token.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -65,7 +65,7 @@ const Admin = (props) => {
     };
 
     const grantRoleMintNft = async function () {
-        await nft.methods.grantRole(process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
+        await nft.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };
@@ -107,7 +107,7 @@ const Admin = (props) => {
     };
 
     const grantRoleMintEggWorker = async function () {
-        await egg.methods.grantRole(process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS, web3.utils.keccak256('MINTER_ROLE')).send({
+        await egg.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS).send({
             from: selectedAccount
         }).then((r) => console.log(r));
     };

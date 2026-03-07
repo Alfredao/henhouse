@@ -18,10 +18,6 @@ contract EggToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, 
         _grantRole(MINTER_ROLE, msg.sender);
     }
 
-    function grantRole(address to, bytes32 role) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(role, to);
-    }
-
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }

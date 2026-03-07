@@ -65,6 +65,7 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     /* Transfers ownership of the item, as well as funds between parties */
     function createMarketSale(address nftContract, uint256 itemId) public nonReentrant {
         require(itemId > 0 && itemId <= _itemIds.current(), "Marketplace: item does not exist");
+        require(nftContract == marketItem[itemId].nftContract, "Marketplace: nftContract mismatch");
 
         uint price = marketItem[itemId].price;
         uint tokenId = marketItem[itemId].tokenId;
