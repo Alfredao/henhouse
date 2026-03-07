@@ -96,6 +96,13 @@ const SellHen = (props) => {
         });
     }
 
+    async function cancelListing() {
+        await market.methods.cancelListing(id).send({from: selectedAccount}).then((r) => {
+            console.log(r);
+            router.push('/game/market');
+        });
+    }
+
     return (
         <>
             <Header/>
@@ -149,7 +156,8 @@ const SellHen = (props) => {
                                     </Col>
                                     <Col xl={4}>
                                         <h2>Preço: {web3.utils.fromWei(web3.utils.toBN(marketItem.price), "ether")} HEN</h2>
-                                        {marketItem.seller === selectedAccount ? "" :
+                                        {marketItem.seller === selectedAccount ?
+                                            <Button color="danger" onClick={cancelListing}>Cancelar venda</Button> :
                                             <>
                                                 {parseInt(allowance.toString()) > parseInt(marketItem.price) ?
                                                     <Button onClick={buyItem}><FontAwesomeIcon icon={faDollarSign}/> Comprar</Button> :
