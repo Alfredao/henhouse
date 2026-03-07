@@ -15,6 +15,7 @@ const OpenEgg = (props) => {
     const [modalOpen, setModalOpen] = React.useState(false);
     const [tokenBalance, setTokenBalance] = React.useState(0.0);
     const [summonPrice, setSummonPrice] = React.useState(0.0);
+    const [allowance, setAllowance] = React.useState(0);
     const [hen, setHen] = React.useState({});
 
     let token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
@@ -25,8 +26,21 @@ const OpenEgg = (props) => {
         if (selectedAccount) {
             await token.methods.balanceOf(selectedAccount).call().then((r) => setTokenBalance(r));
             await summoner.methods.getSummonPrice().call().then((r) => setSummonPrice(r));
+            await token.methods.allowance(selectedAccount, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS).call().then((r) => setAllowance(r));
         }
     });
+
+    const approveToken = async function () {
+        await token.methods.approve(
+            process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS,
+            web3.utils.toWei('1000000', 'ether')
+        ).send({
+            from: selectedAccount
+        }).then((r) => {
+            console.log(r);
+            token.methods.allowance(selectedAccount, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS).call().then((r) => setAllowance(r));
+        });
+    };
 
     const openEgg = async function () {
 
@@ -70,7 +84,9 @@ const OpenEgg = (props) => {
                                                 <h4>Abra um ovo e boa sorte</h4>
                                                 <img style={{height: '400px', width: '100%', display: 'block'}} src="/img/breakegg.jpg" alt={"break-egg"}/>
                                                 <p className="lead">Pague apenas {web3.utils.fromWei(web3.utils.toBN(summonPrice), 'ether')} HEN e receba uma galinha com atributos aleatórios</p>
-                                                <Button className="btn-lg btn-block" onClick={openEgg}>{tokenBalance >= summonPrice ? "Abrir ovo" : "Saldo insuficiente. Compre novos tokens"}</Button>
+                                                {parseInt(allowance.toString()) >= parseInt(summonPrice.toString()) ?
+                                                    <Button className="btn-lg btn-block" onClick={openEgg}>{tokenBalance >= summonPrice ? "Abrir ovo" : "Saldo insuficiente. Compre novos tokens"}</Button> :
+                                                    <Button className="btn-lg btn-block" onClick={approveToken}>Autorizar contrato</Button>}
                                                 <p className="lead mt-3 text-center">Você tem {web3.utils.fromWei(web3.utils.toBN(tokenBalance), 'ether')} HEN</p>
                                             </div>
                                         </div>
