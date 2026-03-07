@@ -67,8 +67,10 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         emit HouseCreated(houseId, minLevel, minProductivity);
     }
 
-    /* Create new houses */
+    /* Start work in a house */
     function startWork(uint256 houseId, uint256 tokenId) public {
+        require(houseId > 0 && houseId <= _houseIds.current(), "HenHouse: house does not exist");
+
         _workIds.increment();
 
         uint256 workId = _workIds.current();
@@ -142,7 +144,9 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         return items;
     }
 
-    function collectEggs(uint256 workId) public {
+    function collectEggs(uint256 workId) public nonReentrant {
+        require(workId > 0 && workId <= _workIds.current(), "HenHouse: work does not exist");
+
         address owner = works[workId].owner;
         uint tokenId = works[workId].tokenId;
         uint blockNumber = works[workId].blockNumber;

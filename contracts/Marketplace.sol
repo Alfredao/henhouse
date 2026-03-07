@@ -64,11 +64,14 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     /* Creates the sale of a marketplace item */
     /* Transfers ownership of the item, as well as funds between parties */
     function createMarketSale(address nftContract, uint256 itemId) public nonReentrant {
+        require(itemId > 0 && itemId <= _itemIds.current(), "Marketplace: item does not exist");
+
         uint price = marketItem[itemId].price;
         uint tokenId = marketItem[itemId].tokenId;
         bool sold = marketItem[itemId].sold;
         address seller = marketItem[itemId].seller;
 
+        require(seller != address(0), "Marketplace: invalid item");
         require(seller != msg.sender, "You can not buy your own item");
         require(false == sold, "This item is already sold");
 
@@ -76,7 +79,7 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         IERC721Upgradeable(nftContract).safeTransferFrom(address(this), msg.sender, tokenId);
 
         // transfer price from owner token balance to seller
-        HenToken(_henToken).transferFrom(msg.sender, payable(seller), price);
+        HenToken(_henToken).transferFrom(msg.sender, seller, price);
 
         marketItem[itemId].soldTo = payable(msg.sender);
         marketItem[itemId].sold = true;
