@@ -23,6 +23,9 @@ contract EggToken is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, 
     }
 
     function spend(address from, uint256 value) public returns (bool) {
+        if (from != msg.sender) {
+            _spendAllowance(from, msg.sender, value);
+        }
         _burn(from, value);
 
         return true;
