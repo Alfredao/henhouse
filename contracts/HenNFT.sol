@@ -106,8 +106,21 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
         return result;
     }
 
+    /**
+     * @dev Generates a pseudo-random number. Uses multiple entropy sources to reduce
+     * predictability, but is NOT truly secure against determined miners/validators.
+     * For high-value use cases, integrate Chainlink VRF or a commit-reveal scheme.
+     */
     function random(uint8 max) private returns (uint8) {
-        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, initialNumber++))) % max) + 1;
+        return uint8(uint256(keccak256(abi.encodePacked(
+            block.timestamp,
+            block.difficulty,
+            block.number,
+            msg.sender,
+            gasleft(),
+            _tokenIdCounter.current(),
+            initialNumber++
+        ))) % max) + 1;
     }
 
     // The following functions are overrides required by Solidity.
