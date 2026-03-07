@@ -72,7 +72,8 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
         return tokenId;
     }
 
-    function levelUp(uint256 tokenId) public {
+    function levelUp(uint256 tokenId) public onlyRole(MINTER_ROLE) {
+        require(_exists(tokenId), "HenNFT: token does not exist");
         uint8 level = _tokenDetails[tokenId].level;
 
         uint8 newLevel = level + 1;
