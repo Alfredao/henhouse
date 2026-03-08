@@ -7,6 +7,7 @@ import Web3 from "web3";
 import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import eggJson from "../../artifacts/contracts/EggToken.sol/EggToken.json";
 import arenaJson from "../../artifacts/contracts/HenArena.sol/HenArena.json";
+import itemJson from "../../artifacts/contracts/HenItem.sol/HenItem.json";
 import {henName} from "../../utils/henName";
 import {FormSelect} from "react-bootstrap";
 
@@ -18,6 +19,8 @@ const Pve = () => {
     const [eggBalance, setEggBalance] = React.useState(0);
     const [allowance, setAllowance] = React.useState(0);
     const [battles, setBattles] = React.useState([]);
+    const [weapons, setWeapons] = React.useState([]);
+    const [armors, setArmors] = React.useState([]);
     const [fighting, setFighting] = React.useState(false);
     const [lastResult, setLastResult] = React.useState(null);
 
@@ -26,6 +29,7 @@ const Pve = () => {
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
     let egg = new web3.eth.Contract(eggJson.abi, process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS);
     let arena = new web3.eth.Contract(arenaJson.abi, process.env.NEXT_PUBLIC_ARENA_CONTRACT_ADDRESS);
+    let item = new web3.eth.Contract(itemJson.abi, process.env.NEXT_PUBLIC_ITEM_CONTRACT_ADDRESS);
 
     async function loadData() {
         if (selectedAccount) {
@@ -60,6 +64,19 @@ const Pve = () => {
             ).call();
             setAllowance(allow);
 
+            // Load player's weapons and armors
+            const inv = await item.methods.getInventory(selectedAccount).call();
+            const weaponList = [];
+            const armorList = [];
+            for (let i = 0; i < inv.length; i++) {
+                const detail = await item.methods.getItem(inv[i].itemId).call();
+                const entry = { ...detail, quantity: inv[i].quantity };
+                if (parseInt(detail.itemType) === 3) weaponList.push(entry); // WEAPON
+                if (parseInt(detail.itemType) === 2) armorList.push(entry);  // ARMOR
+            }
+            setWeapons(weaponList);
+            setArmors(armorList);
+
             // Load battle history (last 10)
             const battleIds = await arena.methods.getPlayerBattles(selectedAccount).call();
             const recentIds = battleIds.slice(-10).reverse();
@@ -91,10 +108,17 @@ const Pve = () => {
         const tokenId = event.target.tokenId.value;
         if (!tokenId) return;
 
+        const weaponId = event.target.weaponId ? event.target.weaponId.value : "0";
+        const armorId = event.target.armorId ? event.target.armorId.value : "0";
+
         setFighting(true);
         setLastResult(null);
 
-        await arena.methods.fight(tokenId).send({
+        const fightMethod = (weaponId !== "0" || armorId !== "0")
+            ? arena.methods.fightWithItems(tokenId, weaponId, armorId)
+            : arena.methods.fight(tokenId);
+
+        await fightMethod.send({
             from: selectedAccount
         }).on('receipt', async function (receipt) {
             const battleEvent = receipt.events.BattleResult;
@@ -144,6 +168,28 @@ const Pve = () => {
                                                             F/{hen.strength}&nbsp;
                                                             E/{hen.stamina}&nbsp;
                                                             S/{hen.health}&nbsp;
+                                                        </option>
+                                                    )}
+                                                </FormSelect>
+                                            </div>
+                                            <div className="form-group mt-3">
+                                                <label htmlFor="weaponId">Arma (opcional)</label>
+                                                <FormSelect name={"weaponId"} id="weaponId" className={"form-control"}>
+                                                    <option value="0">Nenhuma</option>
+                                                    {weapons.map((w) =>
+                                                        <option key={w.itemId} value={w.itemId}>
+                                                            {w.name} (+{w.boostValue} F) x{w.quantity}
+                                                        </option>
+                                                    )}
+                                                </FormSelect>
+                                            </div>
+                                            <div className="form-group mt-2">
+                                                <label htmlFor="armorId">Armadura (opcional)</label>
+                                                <FormSelect name={"armorId"} id="armorId" className={"form-control"}>
+                                                    <option value="0">Nenhuma</option>
+                                                    {armors.map((a) =>
+                                                        <option key={a.itemId} value={a.itemId}>
+                                                            {a.name} (+{a.boostValue} S) x{a.quantity}
                                                         </option>
                                                     )}
                                                 </FormSelect>

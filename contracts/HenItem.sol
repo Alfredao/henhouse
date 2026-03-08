@@ -9,6 +9,8 @@ import "./EggToken.sol";
 contract HenItem is Initializable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
+    mapping(address => bool) private _operators;
+
     enum ItemType { FEED, VITAMIN, ARMOR, WEAPON }
 
     struct Item {
@@ -144,5 +146,25 @@ contract HenItem is Initializable, OwnableUpgradeable {
     function setItemPrice(uint256 itemId, uint256 price) external onlyOwner {
         require(_items[itemId].itemId > 0, "HenItem: item does not exist");
         _items[itemId].price = price;
+    }
+
+    // Operator management: allows other contracts (Arena, HenHouse) to consume items on behalf of players
+    function setOperator(address operator, bool approved) external onlyOwner {
+        _operators[operator] = approved;
+    }
+
+    function isOperator(address operator) external view returns (bool) {
+        return _operators[operator];
+    }
+
+    // Called by operator contracts to consume items from a player's inventory
+    function consumeFrom(address owner, uint256 itemId, uint256 quantity) external {
+        require(_operators[msg.sender], "HenItem: caller is not an operator");
+        require(quantity > 0, "HenItem: quantity must be > 0");
+        require(_inventory[owner][itemId] >= quantity, "HenItem: not enough items");
+
+        _inventory[owner][itemId] -= quantity;
+
+        emit ItemUsed(owner, itemId, quantity);
     }
 }

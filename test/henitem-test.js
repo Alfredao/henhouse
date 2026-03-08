@@ -3,10 +3,10 @@ const { ethers, upgrades } = require("hardhat");
 
 describe("HenItem", function () {
     let henItem, eggToken;
-    let owner, addr1;
+    let owner, addr1, operator;
 
     beforeEach(async function () {
-        [owner, addr1] = await ethers.getSigners();
+        [owner, addr1, operator] = await ethers.getSigners();
 
         // Deploy EggToken
         const EggToken = await ethers.getContractFactory("EggToken");
@@ -135,5 +135,45 @@ describe("HenItem", function () {
         await expect(
             henItem.connect(addr1).buyItem(1, 1)
         ).to.be.revertedWith("ERC20: insufficient allowance");
+    });
+
+    // Operator tests
+
+    it("should allow owner to set operators", async function () {
+        await henItem.setOperator(operator.address, true);
+        expect(await henItem.isOperator(operator.address)).to.be.true;
+
+        await henItem.setOperator(operator.address, false);
+        expect(await henItem.isOperator(operator.address)).to.be.false;
+    });
+
+    it("should allow operator to consumeFrom", async function () {
+        await eggToken.connect(addr1).approve(henItem.address, ethers.utils.parseEther("200"));
+        await henItem.connect(addr1).buyItem(1, 3);
+
+        await henItem.setOperator(operator.address, true);
+
+        await expect(henItem.connect(operator).consumeFrom(addr1.address, 1, 2))
+            .to.emit(henItem, "ItemUsed")
+            .withArgs(addr1.address, 1, 2);
+
+        expect(await henItem.getBalance(addr1.address, 1)).to.equal(1);
+    });
+
+    it("should revert consumeFrom for non-operator", async function () {
+        await eggToken.connect(addr1).approve(henItem.address, ethers.utils.parseEther("200"));
+        await henItem.connect(addr1).buyItem(1, 1);
+
+        await expect(
+            henItem.connect(operator).consumeFrom(addr1.address, 1, 1)
+        ).to.be.revertedWith("HenItem: caller is not an operator");
+    });
+
+    it("should revert consumeFrom when insufficient balance", async function () {
+        await henItem.setOperator(operator.address, true);
+
+        await expect(
+            henItem.connect(operator).consumeFrom(addr1.address, 1, 1)
+        ).to.be.revertedWith("HenItem: not enough items");
     });
 });
