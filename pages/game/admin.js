@@ -13,6 +13,8 @@ import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json"
 import marketJson from "../../artifacts/contracts/Marketplace.sol/Marketplace.json"
 import houseJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
 import trainerJson from "../../artifacts/contracts/HenTrainer.sol/HenTrainer.json"
+import arenaJson from "../../artifacts/contracts/HenArena.sol/HenArena.json"
+import itemJson from "../../artifacts/contracts/HenItem.sol/HenItem.json"
 
 const Admin = (props) => {
 
@@ -27,6 +29,8 @@ const Admin = (props) => {
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
     let house = new web3.eth.Contract(houseJson.abi, process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS);
     let trainer = new web3.eth.Contract(trainerJson.abi, process.env.NEXT_PUBLIC_TRAINER_CONTRACT_ADDRESS);
+    let arena = new web3.eth.Contract(arenaJson.abi, process.env.NEXT_PUBLIC_ARENA_CONTRACT_ADDRESS);
+    let itemContract = new web3.eth.Contract(itemJson.abi, process.env.NEXT_PUBLIC_ITEM_CONTRACT_ADDRESS);
 
     const setHenToken = async function () {
         await ico.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
@@ -132,6 +136,62 @@ const Admin = (props) => {
         }).then((r) => console.log(r));
     };
 
+    // Arena setup
+    const setArenaHen = async function () {
+        await arena.methods.setHen(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setArenaEggToken = async function () {
+        await arena.methods.setEggToken(process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setArenaEntryFee = async function () {
+        await arena.methods.setEntryFee(web3.utils.toWei('5', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setArenaReward = async function () {
+        await arena.methods.setRewardAmount(web3.utils.toWei('15', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const grantRoleMintEggArena = async function () {
+        await egg.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_ARENA_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    // Item shop setup
+    const setItemEggToken = async function () {
+        await itemContract.methods.setEggToken(process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const createShopItems = async function () {
+        await itemContract.methods.createItem("Ração Premium", 0, 10, web3.utils.toWei('5', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+
+        await itemContract.methods.createItem("Vitamina A", 1, 15, web3.utils.toWei('8', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+
+        await itemContract.methods.createItem("Armadura de Ferro", 2, 20, web3.utils.toWei('20', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+
+        await itemContract.methods.createItem("Espora Afiada", 3, 25, web3.utils.toWei('30', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
     const grantRoleMintEggWorker = async function () {
         await egg.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS).send({
             from: selectedAccount
@@ -180,6 +240,15 @@ const Admin = (props) => {
                                                 <Button className="btn-lg btn-block" onClick={setTrainerEggToken}>Definir moeda do treinador (ovos)</Button>
                                                 <Button className="btn-lg btn-block" onClick={setTrainPrice}>Definir preço do treino</Button>
                                                 <Button className="btn-lg btn-block" onClick={grantRoleMintNftTrainer}>Garantir permissão de treinar (levelUp)</Button>
+                                                <hr/>
+                                                <Button className="btn-lg btn-block" onClick={setArenaHen}>Definir galinhas da arena</Button>
+                                                <Button className="btn-lg btn-block" onClick={setArenaEggToken}>Definir moeda da arena (ovos)</Button>
+                                                <Button className="btn-lg btn-block" onClick={setArenaEntryFee}>Definir taxa de entrada da arena</Button>
+                                                <Button className="btn-lg btn-block" onClick={setArenaReward}>Definir recompensa da arena</Button>
+                                                <Button className="btn-lg btn-block" onClick={grantRoleMintEggArena}>Garantir permissão de recompensa da arena</Button>
+                                                <hr/>
+                                                <Button className="btn-lg btn-block" onClick={setItemEggToken}>Definir moeda da loja de itens (ovos)</Button>
+                                                <Button className="btn-lg btn-block" onClick={createShopItems}>Criar itens na loja</Button>
                                             </div>
                                         </div>
                                     </Row>
