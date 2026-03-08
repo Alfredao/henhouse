@@ -27,6 +27,19 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         bool sold;
     }
 
+    // Price history tracking
+    struct SaleRecord {
+        uint256 tokenId;
+        uint256 price;
+        address seller;
+        address buyer;
+        uint256 timestamp;
+    }
+
+    CountersUpgradeable.Counter private _saleRecordIds;
+    mapping(uint256 => SaleRecord) private _saleRecords;
+    mapping(uint256 => uint256[]) private _tokenSaleHistory; // tokenId => saleRecordIds
+
     mapping(uint256 => MarketItem) private marketItem;
 
     event MarketItemCreated (
@@ -37,6 +50,14 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         address soldTo,
         uint256 price,
         bool sold
+    );
+
+    event MarketItemSold (
+        uint indexed itemId,
+        uint256 indexed tokenId,
+        address seller,
+        address buyer,
+        uint256 price
     );
 
     event MarketItemCancelled (
@@ -92,6 +113,14 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         marketItem[itemId].sold = true;
 
         _itemsSold.increment();
+
+        // Record sale in price history
+        _saleRecordIds.increment();
+        uint256 recordId = _saleRecordIds.current();
+        _saleRecords[recordId] = SaleRecord(tokenId, price, seller, msg.sender, block.timestamp);
+        _tokenSaleHistory[tokenId].push(recordId);
+
+        emit MarketItemSold(itemId, tokenId, seller, msg.sender, price);
     }
 
     /* Cancels a listing and returns the NFT to the seller */
@@ -150,6 +179,80 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
      */
     function getHenToken() external view returns (HenToken) {
         return _henToken;
+    }
+
+    /* Returns price history for a specific hen token */
+    function getTokenSaleHistory(uint256 tokenId) public view returns (SaleRecord[] memory) {
+        uint256[] storage recordIds = _tokenSaleHistory[tokenId];
+        SaleRecord[] memory records = new SaleRecord[](recordIds.length);
+        for (uint i = 0; i < recordIds.length; i++) {
+            records[i] = _saleRecords[recordIds[i]];
+        }
+        return records;
+    }
+
+    /* Returns total number of completed sales */
+    function getTotalSales() public view returns (uint256) {
+        return _saleRecordIds.current();
+    }
+
+    /* Returns recent sales (last N) */
+    function getRecentSales(uint256 count) public view returns (SaleRecord[] memory) {
+        uint256 total = _saleRecordIds.current();
+        if (count > total) {
+            count = total;
+        }
+
+        SaleRecord[] memory records = new SaleRecord[](count);
+        for (uint i = 0; i < count; i++) {
+            records[i] = _saleRecords[total - i];
+        }
+        return records;
+    }
+
+    /* Returns unsold items filtered by max price */
+    function fetchMarketItemsByMaxPrice(uint256 maxPrice) public view returns (MarketItem[] memory) {
+        uint count = _itemIds.current();
+
+        // Count matching items
+        uint matchCount = 0;
+        for (uint i = 1; i <= count; i++) {
+            if (!marketItem[i].sold && marketItem[i].price <= maxPrice) {
+                matchCount++;
+            }
+        }
+
+        MarketItem[] memory items = new MarketItem[](matchCount);
+        uint currentIndex = 0;
+        for (uint i = 1; i <= count; i++) {
+            if (!marketItem[i].sold && marketItem[i].price <= maxPrice) {
+                items[currentIndex] = marketItem[i];
+                currentIndex++;
+            }
+        }
+        return items;
+    }
+
+    /* Returns unsold items listed by a specific seller */
+    function fetchMarketItemsBySeller(address seller) public view returns (MarketItem[] memory) {
+        uint count = _itemIds.current();
+
+        uint matchCount = 0;
+        for (uint i = 1; i <= count; i++) {
+            if (!marketItem[i].sold && marketItem[i].seller == seller) {
+                matchCount++;
+            }
+        }
+
+        MarketItem[] memory items = new MarketItem[](matchCount);
+        uint currentIndex = 0;
+        for (uint i = 1; i <= count; i++) {
+            if (!marketItem[i].sold && marketItem[i].seller == seller) {
+                items[currentIndex] = marketItem[i];
+                currentIndex++;
+            }
+        }
+        return items;
     }
 
     /**
