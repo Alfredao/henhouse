@@ -1,4 +1,4 @@
-import {faEgg, faCrow, faTv, faWarehouse, faSkullCrossbones, faSuitcase, faHandHoldingUsd, faQuestion, faTrophy, faHeart} from '@fortawesome/free-solid-svg-icons'
+import {faEgg, faCrow, faTv, faWarehouse, faSkullCrossbones, faSuitcase, faHandHoldingUsd, faQuestion, faTrophy, faHeart, faGift, faBed} from '@fortawesome/free-solid-svg-icons'
 
 const routes = [
     {
@@ -47,6 +47,18 @@ const routes = [
         path: "/breeding",
         name: "Cruzamento",
         icon: faHeart,
+        layout: "/game",
+    },
+    {
+        path: "/dailyRewards",
+        name: "Recompensa Diária",
+        icon: faGift,
+        layout: "/game",
+    },
+    {
+        path: "/retirement",
+        name: "Aposentadoria",
+        icon: faBed,
         layout: "/game",
     },
     {
