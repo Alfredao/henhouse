@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol"
 import "./HenToken.sol";
 import "./EggToken.sol";
 import "./HenNFT.sol";
+import "./HenItem.sol";
 
 contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -19,6 +20,10 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
     HenNFT private _hen;
     HenToken private _henToken;
     EggToken private _eggToken;
+    HenItem private _henItem;
+
+    // Work boost: percentage bonus (100 = no boost, 110 = +10%, etc.)
+    mapping(uint256 => uint256) private _workBoosts;
 
     struct House {
         uint houseId;
@@ -164,9 +169,42 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
 
         uint256 amount = (henAttr.productivity - houses[houseId].minProductivity) * henAttr.level * (block.number - blockNumber) * 1e18;
 
+        // Apply boost multiplier if any
+        uint256 boost = _workBoosts[workId];
+        if (boost > 100) {
+            amount = amount * boost / 100;
+        }
+
         EggToken(_eggToken).mint(msg.sender, amount);
 
         works[workId].blockNumber = block.number;
+    }
+
+    // Use a Feed or Vitamin item to boost egg production for this work session
+    function applyBoost(uint256 workId, uint256 itemId) public {
+        require(workId > 0 && workId <= _workIds.current(), "HenHouse: work does not exist");
+        require(works[workId].owner == msg.sender, "HenHouse: not your work");
+        require(address(_henItem) != address(0), "HenHouse: items not configured");
+
+        HenItem.Item memory item = _henItem.getItem(itemId);
+        require(
+            item.itemType == HenItem.ItemType.FEED || item.itemType == HenItem.ItemType.VITAMIN,
+            "HenHouse: only Feed or Vitamin items allowed"
+        );
+
+        _henItem.consumeFrom(msg.sender, itemId, 1);
+
+        // Add boost: each item adds its boostValue as a percentage
+        uint256 currentBoost = _workBoosts[workId];
+        if (currentBoost == 0) {
+            currentBoost = 100;
+        }
+        _workBoosts[workId] = currentBoost + item.boostValue;
+    }
+
+    function getWorkBoost(uint256 workId) external view returns (uint256) {
+        uint256 boost = _workBoosts[workId];
+        return boost == 0 ? 100 : boost;
     }
 
     /* Stop work and return hen to owner, collecting any pending eggs */
@@ -183,6 +221,16 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         // Collect any pending eggs
         HenNFT.HenAttr memory henAttr = HenNFT(_hen).getHenDetail(tokenId);
         uint256 amount = (henAttr.productivity - houses[houseId].minProductivity) * henAttr.level * (block.number - blockNumber) * 1e18;
+
+        // Apply boost multiplier if any
+        uint256 boost = _workBoosts[workId];
+        if (boost > 100) {
+            amount = amount * boost / 100;
+        }
+
+        // Clear the boost
+        delete _workBoosts[workId];
+
         if (amount > 0) {
             EggToken(_eggToken).mint(msg.sender, amount);
         }
@@ -227,5 +275,9 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
 
     function setHen(HenNFT hen) onlyOwner external {
         _hen = hen;
+    }
+
+    function setHenItem(HenItem henItem) onlyOwner external {
+        _henItem = henItem;
     }
 }

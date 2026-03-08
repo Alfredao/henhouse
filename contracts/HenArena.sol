@@ -5,11 +5,13 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./HenNFT.sol";
 import "./EggToken.sol";
+import "./HenItem.sol";
 
 contract HenArena is Initializable, OwnableUpgradeable {
 
     HenNFT private _hen;
     EggToken private _eggToken;
+    HenItem private _henItem;
     uint256 private _entryFee;
     uint256 private _rewardAmount;
 
@@ -24,9 +26,20 @@ contract HenArena is Initializable, OwnableUpgradeable {
         uint256 timestamp;
     }
 
+    struct PlayerStats {
+        uint256 wins;
+        uint256 losses;
+        uint256 totalEarnings;
+    }
+
     uint256 private _battleCounter;
     mapping(uint256 => Battle) private _battles;
     mapping(address => uint256[]) private _playerBattles;
+    mapping(address => PlayerStats) private _playerStats;
+
+    // Leaderboard: top players sorted by wins
+    address[] private _leaderboardAddresses;
+    mapping(address => bool) private _inLeaderboard;
 
     uint256 private _nonce;
 
@@ -43,11 +56,37 @@ contract HenArena is Initializable, OwnableUpgradeable {
     }
 
     function fight(uint256 tokenId) public {
+        _executeFight(tokenId, 0, 0);
+    }
+
+    function fightWithItems(uint256 tokenId, uint256 weaponItemId, uint256 armorItemId) public {
+        _executeFight(tokenId, weaponItemId, armorItemId);
+    }
+
+    function _executeFight(uint256 tokenId, uint256 weaponItemId, uint256 armorItemId) private {
         require(_hen.ownerOf(tokenId) == msg.sender, "HenArena: you do not own this hen");
 
         // Charge entry fee in EGG tokens
         if (_entryFee > 0) {
             _eggToken.spend(msg.sender, _entryFee);
+        }
+
+        // Consume items if provided
+        uint256 weaponBoost = 0;
+        uint256 armorBoost = 0;
+
+        if (weaponItemId > 0 && address(_henItem) != address(0)) {
+            HenItem.Item memory weaponItem = _henItem.getItem(weaponItemId);
+            require(weaponItem.itemType == HenItem.ItemType.WEAPON, "HenArena: not a weapon");
+            _henItem.consumeFrom(msg.sender, weaponItemId, 1);
+            weaponBoost = weaponItem.boostValue;
+        }
+
+        if (armorItemId > 0 && address(_henItem) != address(0)) {
+            HenItem.Item memory armorItem = _henItem.getItem(armorItemId);
+            require(armorItem.itemType == HenItem.ItemType.ARMOR, "HenArena: not armor");
+            _henItem.consumeFrom(msg.sender, armorItemId, 1);
+            armorBoost = armorItem.boostValue;
         }
 
         HenNFT.HenAttr memory attr = _hen.getHenDetail(tokenId);
@@ -57,11 +96,12 @@ contract HenArena is Initializable, OwnableUpgradeable {
         uint8 enemyStamina = _random(uint8(attr.level) * 15 + 30);
         uint8 enemyHealth = _random(uint8(attr.level) * 15 + 30);
 
-        // Calculate combat scores
-        // Player score: weighted sum of strength (40%), stamina (30%), health (30%) * level modifier
-        uint256 playerScore = (uint256(attr.strength) * 40 + uint256(attr.stamina) * 30 + uint256(attr.health) * 30) * uint256(attr.level);
+        // Calculate combat scores with item boosts
+        // Weapon boosts strength, Armor boosts health
+        uint256 boostedStrength = uint256(attr.strength) + weaponBoost;
+        uint256 boostedHealth = uint256(attr.health) + armorBoost;
 
-        // Enemy score: weighted sum of enemy stats
+        uint256 playerScore = (boostedStrength * 40 + uint256(attr.stamina) * 30 + boostedHealth * 30) * uint256(attr.level);
         uint256 enemyScore = (uint256(enemyStrength) * 40 + uint256(enemyStamina) * 30 + uint256(enemyHealth) * 30);
 
         // Add randomness factor (0-20% swing)
@@ -88,10 +128,22 @@ contract HenArena is Initializable, OwnableUpgradeable {
 
         _playerBattles[msg.sender].push(_battleCounter);
 
+        // Update leaderboard stats
+        if (!_inLeaderboard[msg.sender]) {
+            _inLeaderboard[msg.sender] = true;
+            _leaderboardAddresses.push(msg.sender);
+        }
+
         uint256 reward = 0;
-        if (won && _rewardAmount > 0) {
-            reward = _rewardAmount;
-            _eggToken.mint(msg.sender, reward);
+        if (won) {
+            _playerStats[msg.sender].wins++;
+            if (_rewardAmount > 0) {
+                reward = _rewardAmount;
+                _eggToken.mint(msg.sender, reward);
+                _playerStats[msg.sender].totalEarnings += reward;
+            }
+        } else {
+            _playerStats[msg.sender].losses++;
         }
 
         emit BattleResult(_battleCounter, msg.sender, tokenId, won, reward);
@@ -108,6 +160,32 @@ contract HenArena is Initializable, OwnableUpgradeable {
 
     function getBattleCount() external view returns (uint256) {
         return _battleCounter;
+    }
+
+    function getPlayerStats(address player) external view returns (PlayerStats memory) {
+        return _playerStats[player];
+    }
+
+    // Returns leaderboard: arrays of addresses, wins, losses, earnings
+    function getLeaderboard() external view returns (
+        address[] memory addresses,
+        uint256[] memory wins,
+        uint256[] memory losses,
+        uint256[] memory earnings
+    ) {
+        uint256 count = _leaderboardAddresses.length;
+        addresses = new address[](count);
+        wins = new uint256[](count);
+        losses = new uint256[](count);
+        earnings = new uint256[](count);
+
+        for (uint256 i = 0; i < count; i++) {
+            address addr = _leaderboardAddresses[i];
+            addresses[i] = addr;
+            wins[i] = _playerStats[addr].wins;
+            losses[i] = _playerStats[addr].losses;
+            earnings[i] = _playerStats[addr].totalEarnings;
+        }
     }
 
     // Admin setters
@@ -134,6 +212,10 @@ contract HenArena is Initializable, OwnableUpgradeable {
 
     function setEggToken(EggToken eggToken) external onlyOwner {
         _eggToken = eggToken;
+    }
+
+    function setHenItem(HenItem henItem) external onlyOwner {
+        _henItem = henItem;
     }
 
     function _random(uint8 max) private returns (uint8) {

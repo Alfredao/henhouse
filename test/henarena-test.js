@@ -2,11 +2,11 @@ const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 
 describe("HenArena", function () {
-    let henArena, henNft, eggToken;
-    let owner, addr1;
+    let henArena, henNft, eggToken, henItem;
+    let owner, addr1, addr2;
 
     beforeEach(async function () {
-        [owner, addr1] = await ethers.getSigners();
+        [owner, addr1, addr2] = await ethers.getSigners();
 
         // Deploy EggToken
         const EggToken = await ethers.getContractFactory("EggToken");
@@ -18,6 +18,17 @@ describe("HenArena", function () {
         henNft = await upgrades.deployProxy(HenNFT, ["Black Hen", "BlackHEN"]);
         await henNft.deployed();
 
+        // Deploy HenItem
+        const HenItem = await ethers.getContractFactory("HenItem");
+        henItem = await upgrades.deployProxy(HenItem);
+        await henItem.deployed();
+        await henItem.setEggToken(eggToken.address);
+
+        // Create weapon and armor items
+        await henItem.createItem("Espora Afiada", 3, 25, ethers.utils.parseEther("10")); // itemId=1 WEAPON
+        await henItem.createItem("Armadura de Ferro", 2, 20, ethers.utils.parseEther("10")); // itemId=2 ARMOR
+        await henItem.createItem("Ração Premium", 0, 10, ethers.utils.parseEther("5")); // itemId=3 FEED
+
         // Deploy HenArena
         const HenArena = await ethers.getContractFactory("HenArena");
         henArena = await upgrades.deployProxy(HenArena);
@@ -26,18 +37,24 @@ describe("HenArena", function () {
         // Wire up
         await henArena.setHen(henNft.address);
         await henArena.setEggToken(eggToken.address);
+        await henArena.setHenItem(henItem.address);
         await henArena.setEntryFee(ethers.utils.parseEther("5"));
         await henArena.setRewardAmount(ethers.utils.parseEther("15"));
 
-        // Grant MINTER_ROLE to arena on EggToken so it can mint rewards
+        // Set arena as operator on HenItem
+        await henItem.setOperator(henArena.address, true);
+
+        // Grant MINTER_ROLE to arena on EggToken
         const MINTER_ROLE = await eggToken.MINTER_ROLE();
         await eggToken.grantRole(MINTER_ROLE, henArena.address);
 
-        // Mint an NFT to addr1
+        // Mint NFTs
         await henNft.safeMint(addr1.address);
+        await henNft.safeMint(addr2.address);
 
-        // Give addr1 EGG tokens for entry fees
-        await eggToken.mint(addr1.address, ethers.utils.parseEther("100"));
+        // Give EGG tokens
+        await eggToken.mint(addr1.address, ethers.utils.parseEther("500"));
+        await eggToken.mint(addr2.address, ethers.utils.parseEther("500"));
     });
 
     it("should allow a player to fight and emit BattleResult", async function () {
@@ -50,8 +67,6 @@ describe("HenArena", function () {
         expect(event).to.not.be.undefined;
         expect(event.args.player).to.equal(addr1.address);
         expect(event.args.tokenId).to.equal(0);
-
-        // Battle count should be 1
         expect(await henArena.getBattleCount()).to.equal(1);
     });
 
@@ -86,10 +101,8 @@ describe("HenArena", function () {
         const battle = await henArena.getBattle(1);
 
         if (battle.won) {
-            // Won: paid 5, got 15 => net +10
             expect(balAfter.sub(balBefore)).to.equal(ethers.utils.parseEther("10"));
         } else {
-            // Lost: paid 5, got 0 => net -5
             expect(balBefore.sub(balAfter)).to.equal(ethers.utils.parseEther("5"));
         }
     });
@@ -111,7 +124,6 @@ describe("HenArena", function () {
     it("should allow fighting with zero entry fee", async function () {
         await henArena.setEntryFee(0);
 
-        // No approval needed when fee is 0
         const tx = await henArena.connect(addr1).fight(0);
         const receipt = await tx.wait();
 
@@ -135,5 +147,85 @@ describe("HenArena", function () {
         await expect(
             henArena.getBattle(999)
         ).to.be.revertedWith("HenArena: battle does not exist");
+    });
+
+    // Item integration tests
+
+    it("should allow fighting with weapon and armor items", async function () {
+        // Buy weapon and armor
+        await eggToken.connect(addr1).approve(henItem.address, ethers.utils.parseEther("200"));
+        await henItem.connect(addr1).buyItem(1, 1); // weapon
+        await henItem.connect(addr1).buyItem(2, 1); // armor
+
+        await eggToken.connect(addr1).approve(henArena.address, ethers.utils.parseEther("100"));
+
+        const tx = await henArena.connect(addr1).fightWithItems(0, 1, 2);
+        const receipt = await tx.wait();
+
+        const event = receipt.events.find(e => e.event === "BattleResult");
+        expect(event).to.not.be.undefined;
+
+        // Items should be consumed
+        expect(await henItem.getBalance(addr1.address, 1)).to.equal(0);
+        expect(await henItem.getBalance(addr1.address, 2)).to.equal(0);
+    });
+
+    it("should revert when using non-weapon item as weapon", async function () {
+        await eggToken.connect(addr1).approve(henItem.address, ethers.utils.parseEther("200"));
+        await henItem.connect(addr1).buyItem(3, 1); // feed item
+
+        await eggToken.connect(addr1).approve(henArena.address, ethers.utils.parseEther("100"));
+
+        await expect(
+            henArena.connect(addr1).fightWithItems(0, 3, 0)
+        ).to.be.revertedWith("HenArena: not a weapon");
+    });
+
+    it("should revert when player doesn't own the item", async function () {
+        await eggToken.connect(addr1).approve(henArena.address, ethers.utils.parseEther("100"));
+
+        await expect(
+            henArena.connect(addr1).fightWithItems(0, 1, 0)
+        ).to.be.revertedWith("HenItem: not enough items");
+    });
+
+    // Leaderboard tests
+
+    it("should track player stats (wins/losses)", async function () {
+        await eggToken.connect(addr1).approve(henArena.address, ethers.utils.parseEther("500"));
+
+        // Fight multiple times
+        for (let i = 0; i < 3; i++) {
+            await henArena.connect(addr1).fight(0);
+        }
+
+        const stats = await henArena.getPlayerStats(addr1.address);
+        expect(stats.wins.add(stats.losses)).to.equal(3);
+    });
+
+    it("should return leaderboard data", async function () {
+        await eggToken.connect(addr1).approve(henArena.address, ethers.utils.parseEther("500"));
+        await eggToken.connect(addr2).approve(henArena.address, ethers.utils.parseEther("500"));
+
+        await henArena.connect(addr1).fight(0);
+        await henArena.connect(addr2).fight(1);
+
+        const lb = await henArena.getLeaderboard();
+        expect(lb.addresses.length).to.equal(2);
+        expect(lb.addresses).to.include(addr1.address);
+        expect(lb.addresses).to.include(addr2.address);
+    });
+
+    it("should track earnings in leaderboard", async function () {
+        await henArena.setEntryFee(0);
+
+        await henArena.connect(addr1).fight(0);
+
+        const stats = await henArena.getPlayerStats(addr1.address);
+        if (stats.wins.gt(0)) {
+            expect(stats.totalEarnings).to.equal(ethers.utils.parseEther("15"));
+        } else {
+            expect(stats.totalEarnings).to.equal(0);
+        }
     });
 });

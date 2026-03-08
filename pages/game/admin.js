@@ -15,6 +15,7 @@ import houseJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
 import trainerJson from "../../artifacts/contracts/HenTrainer.sol/HenTrainer.json"
 import arenaJson from "../../artifacts/contracts/HenArena.sol/HenArena.json"
 import itemJson from "../../artifacts/contracts/HenItem.sol/HenItem.json"
+import breederJson from "../../artifacts/contracts/HenBreeder.sol/HenBreeder.json"
 
 const Admin = (props) => {
 
@@ -31,6 +32,7 @@ const Admin = (props) => {
     let trainer = new web3.eth.Contract(trainerJson.abi, process.env.NEXT_PUBLIC_TRAINER_CONTRACT_ADDRESS);
     let arena = new web3.eth.Contract(arenaJson.abi, process.env.NEXT_PUBLIC_ARENA_CONTRACT_ADDRESS);
     let itemContract = new web3.eth.Contract(itemJson.abi, process.env.NEXT_PUBLIC_ITEM_CONTRACT_ADDRESS);
+    let breederContract = new web3.eth.Contract(breederJson.abi, process.env.NEXT_PUBLIC_BREEDER_CONTRACT_ADDRESS);
 
     const setHenToken = async function () {
         await ico.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
@@ -192,6 +194,55 @@ const Admin = (props) => {
         }).then((r) => console.log(r));
     };
 
+    const setArenaHenItem = async function () {
+        await arena.methods.setHenItem(process.env.NEXT_PUBLIC_ITEM_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setItemOperatorArena = async function () {
+        await itemContract.methods.setOperator(process.env.NEXT_PUBLIC_ARENA_CONTRACT_ADDRESS, true).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setHouseHenItem = async function () {
+        await house.methods.setHenItem(process.env.NEXT_PUBLIC_ITEM_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setItemOperatorHouse = async function () {
+        await itemContract.methods.setOperator(process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS, true).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    // Breeder setup
+    const setBreederHen = async function () {
+        await breederContract.methods.setHen(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setBreederEggToken = async function () {
+        await breederContract.methods.setEggToken(process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setBreedPrice = async function () {
+        await breederContract.methods.setBreedPrice(web3.utils.toWei('20', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const grantRoleMintNftBreeder = async function () {
+        await nft.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_BREEDER_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
     const grantRoleMintEggWorker = async function () {
         await egg.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS).send({
             from: selectedAccount
@@ -249,6 +300,15 @@ const Admin = (props) => {
                                                 <hr/>
                                                 <Button className="btn-lg btn-block" onClick={setItemEggToken}>Definir moeda da loja de itens (ovos)</Button>
                                                 <Button className="btn-lg btn-block" onClick={createShopItems}>Criar itens na loja</Button>
+                                                <Button className="btn-lg btn-block" onClick={setArenaHenItem}>Definir itens da arena</Button>
+                                                <Button className="btn-lg btn-block" onClick={setItemOperatorArena}>Autorizar arena como operador de itens</Button>
+                                                <Button className="btn-lg btn-block" onClick={setHouseHenItem}>Definir itens do galinheiro</Button>
+                                                <Button className="btn-lg btn-block" onClick={setItemOperatorHouse}>Autorizar galinheiro como operador de itens</Button>
+                                                <hr/>
+                                                <Button className="btn-lg btn-block" onClick={setBreederHen}>Definir galinhas do cruzamento</Button>
+                                                <Button className="btn-lg btn-block" onClick={setBreederEggToken}>Definir moeda do cruzamento (ovos)</Button>
+                                                <Button className="btn-lg btn-block" onClick={setBreedPrice}>Definir preço do cruzamento</Button>
+                                                <Button className="btn-lg btn-block" onClick={grantRoleMintNftBreeder}>Garantir permissão de cruzamento (mint)</Button>
                                             </div>
                                         </div>
                                     </Row>
