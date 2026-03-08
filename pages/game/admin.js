@@ -12,6 +12,7 @@ import icoJson from "../../artifacts/contracts/HenHouseIco.sol/HenHouseIco.json"
 import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json"
 import marketJson from "../../artifacts/contracts/Marketplace.sol/Marketplace.json"
 import houseJson from "../../artifacts/contracts/HenHouse.sol/HenHouse.json"
+import trainerJson from "../../artifacts/contracts/HenTrainer.sol/HenTrainer.json"
 
 const Admin = (props) => {
 
@@ -25,6 +26,7 @@ const Admin = (props) => {
     let ico = new web3.eth.Contract(icoJson.abi, process.env.NEXT_PUBLIC_ICO_CONTRACT_ADDRESS);
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
     let house = new web3.eth.Contract(houseJson.abi, process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS);
+    let trainer = new web3.eth.Contract(trainerJson.abi, process.env.NEXT_PUBLIC_TRAINER_CONTRACT_ADDRESS);
 
     const setHenToken = async function () {
         await ico.methods.setHenToken(process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS).send({
@@ -106,6 +108,30 @@ const Admin = (props) => {
         }).then((r) => console.log(r));
     };
 
+    const setTrainerHen = async function () {
+        await trainer.methods.setHen(process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setTrainerEggToken = async function () {
+        await trainer.methods.setEggToken(process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const setTrainPrice = async function () {
+        await trainer.methods.setTrainPrice(web3.utils.toWei('10', 'ether')).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
+    const grantRoleMintNftTrainer = async function () {
+        await nft.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_TRAINER_CONTRACT_ADDRESS).send({
+            from: selectedAccount
+        }).then((r) => console.log(r));
+    };
+
     const grantRoleMintEggWorker = async function () {
         await egg.methods.grantRole(web3.utils.keccak256('MINTER_ROLE'), process.env.NEXT_PUBLIC_HOUSE_CONTRACT_ADDRESS).send({
             from: selectedAccount
@@ -149,6 +175,11 @@ const Admin = (props) => {
                                                 <Button className="btn-lg btn-block" onClick={setHouseHen}>Definir galinhas do galinheiro</Button>
                                                 <Button className="btn-lg btn-block" onClick={setEggToken}>Definir moeda de recomensa (ovos)</Button>
                                                 <Button className="btn-lg btn-block" onClick={grantRoleMintEggWorker}>Garantir permissão de coletar ovos</Button>
+                                                <hr/>
+                                                <Button className="btn-lg btn-block" onClick={setTrainerHen}>Definir galinhas do treinador</Button>
+                                                <Button className="btn-lg btn-block" onClick={setTrainerEggToken}>Definir moeda do treinador (ovos)</Button>
+                                                <Button className="btn-lg btn-block" onClick={setTrainPrice}>Definir preço do treino</Button>
+                                                <Button className="btn-lg btn-block" onClick={grantRoleMintNftTrainer}>Garantir permissão de treinar (levelUp)</Button>
                                             </div>
                                         </div>
                                     </Row>
