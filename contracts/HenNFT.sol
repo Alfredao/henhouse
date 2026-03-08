@@ -27,6 +27,8 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
     }
 
     mapping(uint256 => HenAttr) private _tokenDetails;
+    mapping(address => uint256[]) private _ownedTokens;
+    mapping(uint256 => uint256) private _ownedTokensIndex;
 
     function initialize(string memory name, string memory ticker) initializer public {
         __ERC721_init(name, ticker);
@@ -35,10 +37,6 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
-    }
-
-    function grantRole(address to, bytes32 role) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(role, to);
     }
 
     function safeMint(address to) public onlyRole(MINTER_ROLE) returns (uint256) {
@@ -72,7 +70,8 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
         return tokenId;
     }
 
-    function levelUp(uint256 tokenId) public {
+    function levelUp(uint256 tokenId) public onlyRole(MINTER_ROLE) {
+        require(_exists(tokenId), "HenNFT: token does not exist");
         uint8 level = _tokenDetails[tokenId].level;
 
         uint8 newLevel = level + 1;
@@ -85,28 +84,48 @@ contract HenNFT is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, 
     }
 
     function getHenByUser(address user) public view returns (uint256[] memory) {
-        uint256 henCount = balanceOf(user);
-
-        if (henCount == 0) {
-            return new uint256[](0);
-        }
-
-        uint256[] memory result = new uint256[](henCount);
-        uint256 resIndex = 0;
-        uint256 i;
-
-        for (i = 0; i < _tokenIdCounter.current(); i++) {
-            if (ownerOf(i) == user) {
-                result[resIndex] = i;
-                resIndex++;
-            }
-        }
-
-        return result;
+        return _ownedTokens[user];
     }
 
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId);
+
+        if (from != address(0)) {
+            // Remove token from previous owner
+            uint256 lastIndex = _ownedTokens[from].length - 1;
+            uint256 tokenIndex = _ownedTokensIndex[tokenId];
+
+            if (tokenIndex != lastIndex) {
+                uint256 lastTokenId = _ownedTokens[from][lastIndex];
+                _ownedTokens[from][tokenIndex] = lastTokenId;
+                _ownedTokensIndex[lastTokenId] = tokenIndex;
+            }
+
+            _ownedTokens[from].pop();
+        }
+
+        if (to != address(0)) {
+            // Add token to new owner
+            _ownedTokensIndex[tokenId] = _ownedTokens[to].length;
+            _ownedTokens[to].push(tokenId);
+        }
+    }
+
+    /**
+     * @dev Generates a pseudo-random number. Uses multiple entropy sources to reduce
+     * predictability, but is NOT truly secure against determined miners/validators.
+     * For high-value use cases, integrate Chainlink VRF or a commit-reveal scheme.
+     */
     function random(uint8 max) private returns (uint8) {
-        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, initialNumber++))) % max) + 1;
+        return uint8(uint256(keccak256(abi.encodePacked(
+            block.timestamp,
+            block.difficulty,
+            block.number,
+            msg.sender,
+            gasleft(),
+            _tokenIdCounter.current(),
+            initialNumber++
+        ))) % max) + 1;
     }
 
     // The following functions are overrides required by Solidity.

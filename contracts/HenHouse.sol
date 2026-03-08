@@ -51,6 +51,12 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         uint blockNumber
     );
 
+    event WorkStopped (
+        uint workId,
+        uint tokenId,
+        address owner
+    );
+
     function initialize() initializer public {
         __Ownable_init();
         __ReentrancyGuard_init_unchained();
@@ -67,8 +73,10 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         emit HouseCreated(houseId, minLevel, minProductivity);
     }
 
-    /* Create new houses */
+    /* Start work in a house */
     function startWork(uint256 houseId, uint256 tokenId) public {
+        require(houseId > 0 && houseId <= _houseIds.current(), "HenHouse: house does not exist");
+
         _workIds.increment();
 
         uint256 workId = _workIds.current();
@@ -142,7 +150,9 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         return items;
     }
 
-    function collectEggs(uint256 workId) public {
+    function collectEggs(uint256 workId) public nonReentrant {
+        require(workId > 0 && workId <= _workIds.current(), "HenHouse: work does not exist");
+
         address owner = works[workId].owner;
         uint tokenId = works[workId].tokenId;
         uint blockNumber = works[workId].blockNumber;
@@ -157,6 +167,33 @@ contract HenHouse is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeab
         EggToken(_eggToken).mint(msg.sender, amount);
 
         works[workId].blockNumber = block.number;
+    }
+
+    /* Stop work and return hen to owner, collecting any pending eggs */
+    function stopWork(uint256 workId) public nonReentrant {
+        require(workId > 0 && workId <= _workIds.current(), "HenHouse: work does not exist");
+
+        address owner = works[workId].owner;
+        uint tokenId = works[workId].tokenId;
+        uint blockNumber = works[workId].blockNumber;
+        uint houseId = works[workId].houseId;
+
+        require(owner == msg.sender, "You can only stop your own work");
+
+        // Collect any pending eggs
+        HenNFT.HenAttr memory henAttr = HenNFT(_hen).getHenDetail(tokenId);
+        uint256 amount = (henAttr.productivity - houses[houseId].minProductivity) * henAttr.level * (block.number - blockNumber) * 1e18;
+        if (amount > 0) {
+            EggToken(_eggToken).mint(msg.sender, amount);
+        }
+
+        // Return hen NFT to owner
+        IERC721Upgradeable(_hen).safeTransferFrom(address(this), msg.sender, tokenId);
+
+        // Clear the work entry
+        delete works[workId];
+
+        emit WorkStopped(workId, tokenId, msg.sender);
     }
 
     /* Get details from house item */

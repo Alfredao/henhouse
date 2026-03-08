@@ -39,6 +39,12 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         bool sold
     );
 
+    event MarketItemCancelled (
+        uint indexed itemId,
+        uint256 indexed tokenId,
+        address seller
+    );
+
     function initialize() initializer public {
         __Ownable_init();
         __ReentrancyGuard_init_unchained();
@@ -64,11 +70,15 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
     /* Creates the sale of a marketplace item */
     /* Transfers ownership of the item, as well as funds between parties */
     function createMarketSale(address nftContract, uint256 itemId) public nonReentrant {
+        require(itemId > 0 && itemId <= _itemIds.current(), "Marketplace: item does not exist");
+        require(nftContract == marketItem[itemId].nftContract, "Marketplace: nftContract mismatch");
+
         uint price = marketItem[itemId].price;
         uint tokenId = marketItem[itemId].tokenId;
         bool sold = marketItem[itemId].sold;
         address seller = marketItem[itemId].seller;
 
+        require(seller != address(0), "Marketplace: invalid item");
         require(seller != msg.sender, "You can not buy your own item");
         require(false == sold, "This item is already sold");
 
@@ -76,12 +86,32 @@ contract Marketplace is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrad
         IERC721Upgradeable(nftContract).safeTransferFrom(address(this), msg.sender, tokenId);
 
         // transfer price from owner token balance to seller
-        HenToken(_henToken).transferFrom(msg.sender, payable(seller), price);
+        HenToken(_henToken).transferFrom(msg.sender, seller, price);
 
         marketItem[itemId].soldTo = payable(msg.sender);
         marketItem[itemId].sold = true;
 
         _itemsSold.increment();
+    }
+
+    /* Cancels a listing and returns the NFT to the seller */
+    function cancelListing(uint256 itemId) public nonReentrant {
+        require(itemId > 0 && itemId <= _itemIds.current(), "Marketplace: item does not exist");
+        require(marketItem[itemId].seller == msg.sender, "Marketplace: only seller can cancel");
+        require(!marketItem[itemId].sold, "Marketplace: item already sold");
+
+        uint256 tokenId = marketItem[itemId].tokenId;
+        address nftContract = marketItem[itemId].nftContract;
+
+        // Return NFT to seller
+        IERC721Upgradeable(nftContract).safeTransferFrom(address(this), msg.sender, tokenId);
+
+        // Mark as sold to remove from active listings
+        marketItem[itemId].sold = true;
+        marketItem[itemId].soldTo = payable(address(0));
+        _itemsSold.increment();
+
+        emit MarketItemCancelled(itemId, tokenId, msg.sender);
     }
 
     /* Returns all unsold market items */

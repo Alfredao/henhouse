@@ -110,6 +110,12 @@ const House = (props) => {
         });
     }
 
+    async function stopWork(e) {
+        await house.methods.stopWork(e.currentTarget.getAttribute("data-work")).send({from: selectedAccount}).then((r) => {
+            console.log(r);
+        });
+    }
+
     async function submitForm(event) {
         event.preventDefault();
 
@@ -195,7 +201,7 @@ const House = (props) => {
                                                 <td>{work.eggs}</td>
                                                 <td>
                                                     <Button onClick={collectEggs} data-work={work.workId}>Coletar ovos</Button>
-                                                    <Button>Sair</Button>
+                                                    <Button onClick={stopWork} data-work={work.workId}>Sair</Button>
                                                 </td>
                                             </tr>
                                         )}
