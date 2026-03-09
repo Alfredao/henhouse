@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Button, Card, CardBody, CardHeader, Col, Container, Modal, ModalBody, ModalFooter, Row,} from "reactstrap";
+import {Card, CardBody, Col, Container, Modal, ModalBody, ModalFooter, Row} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 import {walletState} from "../../states/walletState";
@@ -9,8 +9,7 @@ import summonerJson from "../../artifacts/contracts/HenSummoner.sol/HenSummoner.
 import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import {henName} from "../../utils/henName";
 
-const OpenEgg = (props) => {
-
+const OpenEgg = () => {
     const {web3, selectedAccount} = walletState();
     const [modalOpen, setModalOpen] = React.useState(false);
     const [tokenBalance, setTokenBalance] = React.useState(0.0);
@@ -31,29 +30,16 @@ const OpenEgg = (props) => {
     });
 
     const approveToken = async function () {
-        await token.methods.approve(
-            process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS,
-            web3.utils.toWei('1000000', 'ether')
-        ).send({
-            from: selectedAccount
-        }).then((r) => {
-            console.log(r);
-            token.methods.allowance(selectedAccount, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS).call().then((r) => setAllowance(r));
-        });
+        await token.methods.approve(process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS, web3.utils.toWei('1000000', 'ether'))
+            .send({from: selectedAccount}).then(() => {
+                token.methods.allowance(selectedAccount, process.env.NEXT_PUBLIC_SUMMONER_CONTRACT_ADDRESS).call().then((r) => setAllowance(r));
+            });
     };
 
     const openEgg = async function () {
-
-        if (tokenBalance < summonPrice) {
-            return false;
-        }
-
-        await summoner.methods.summon().send({
-            from: selectedAccount
-        }).on('receipt', async function (receipt) {
-            await nft.methods.getHenDetail(
-                receipt.events.NewHen.returnValues.tokenId
-            ).call().then((detail) => {
+        if (tokenBalance < summonPrice) return false;
+        await summoner.methods.summon().send({from: selectedAccount}).on('receipt', async function (receipt) {
+            await nft.methods.getHenDetail(receipt.events.NewHen.returnValues.tokenId).call().then((detail) => {
                 setHen(detail);
                 setModalOpen(true);
             });
@@ -63,59 +49,59 @@ const OpenEgg = (props) => {
     return (
         <>
             <Header/>
-            {/* Page content */}
             <Container className="mt--7" fluid>
-                <Row className="mt-5">
-                    <Col className="mb-5 mb-xl-0" xl="12">
-                        <Card className="shadow">
-                            <CardHeader className="border-0">
-                                <Row className="align-items-center">
-                                    <div className="col">
-                                        <h3 className="mb-0">Abrir ovo</h3>
+                <Row className="justify-content-center">
+                    <Col md={6}>
+                        <Card className="hh-card text-center">
+                            <CardBody className="p-5">
+                                <h2 style={{fontWeight: 800, marginBottom: '0.5rem'}}>Consiga uma galinha agora</h2>
+                                <p className="hh-text-muted mb-4">Abra um ovo e boa sorte!</p>
+                                <img style={{maxHeight: '300px', width: '100%', objectFit: 'cover', borderRadius: '12px'}}
+                                     src="/img/breakegg.jpg" alt={"break-egg"} className="mb-4"/>
+
+                                <div className="d-flex justify-content-center mb-4" style={{gap: '2rem'}}>
+                                    <div>
+                                        <div className="hh-stat-label">Preco</div>
+                                        <span className="hh-price-tag">{web3.utils.fromWei(web3.utils.toBN(summonPrice), 'ether')} HEN</span>
                                     </div>
-                                </Row>
-                            </CardHeader>
-                            <CardBody>
-                                <div className="container d-flex h-100">
-                                    <Row className="align-self-center w-100">
-                                        <div className="col-6 mx-auto">
-                                            <div className="jumbotron">
-                                                <h1>Consiga uma galinha agora</h1>
-                                                <h4>Abra um ovo e boa sorte</h4>
-                                                <img style={{height: '400px', width: '100%', display: 'block'}} src="/img/breakegg.jpg" alt={"break-egg"}/>
-                                                <p className="lead">Pague apenas {web3.utils.fromWei(web3.utils.toBN(summonPrice), 'ether')} HEN e receba uma galinha com atributos aleatórios</p>
-                                                {parseInt(allowance.toString()) >= parseInt(summonPrice.toString()) ?
-                                                    <Button className="btn-lg btn-block" onClick={openEgg}>{tokenBalance >= summonPrice ? "Abrir ovo" : "Saldo insuficiente. Compre novos tokens"}</Button> :
-                                                    <Button className="btn-lg btn-block" onClick={approveToken}>Autorizar contrato</Button>}
-                                                <p className="lead mt-3 text-center">Você tem {web3.utils.fromWei(web3.utils.toBN(tokenBalance), 'ether')} HEN</p>
-                                            </div>
-                                        </div>
-                                    </Row>
+                                    <div>
+                                        <div className="hh-stat-label">Seu saldo</div>
+                                        <span style={{fontWeight: 700}}>{web3.utils.fromWei(web3.utils.toBN(tokenBalance), 'ether')} HEN</span>
+                                    </div>
                                 </div>
+
+                                {parseInt(allowance.toString()) >= parseInt(summonPrice.toString()) ?
+                                    <button className="hh-btn hh-btn-primary btn-block" style={{padding: '0.75rem', fontSize: '1.1rem'}} onClick={openEgg}>
+                                        {tokenBalance >= summonPrice ? "Abrir ovo" : "Saldo insuficiente"}
+                                    </button> :
+                                    <button className="hh-btn hh-btn-primary btn-block" style={{padding: '0.75rem', fontSize: '1.1rem'}} onClick={approveToken}>
+                                        Autorizar contrato
+                                    </button>
+                                }
                             </CardBody>
                         </Card>
                     </Col>
                 </Row>
             </Container>
+
             <Modal toggle={() => setModalOpen(!modalOpen)} isOpen={modalOpen}>
-                <div className=" modal-header">
-                    <h1 className=" modal-title" id="exampleModalLabel">{henName(hen.genetic)}</h1>
+                <div className="modal-header" style={{borderBottom: 'none', paddingBottom: 0}}>
+                    <h2 className="modal-title" style={{fontWeight: 800}}>{henName(hen.genetic)}</h2>
                 </div>
                 <ModalBody>
-                    <img src={"/img/hen/" + hen.genetic + ".jpg"} alt="hen" className={"img-fluid"}/>
-                    <hr/>
-                    <div className="d-flex justify-content-between align-items-center mt-3 mb-3">
-                        <span className={"mr-2"}><strong>P /</strong> {hen.productivity}</span>
-                        <span className={"mr-2"}><strong>R /</strong> {hen.endurance}</span>
-                        <span className={"mr-2"}><strong>F /</strong> {hen.strength}</span>
-                        <span className={"mr-2"}><strong>E /</strong> {hen.stamina}</span>
-                        <span className={"mr-2"}><strong>S /</strong> {hen.health}</span>
+                    <img src={"/img/hen/" + hen.genetic + ".jpg"} alt="hen" className="img-fluid" style={{borderRadius: '12px'}}/>
+                    <div className="hh-attr-row mt-3 justify-content-center">
+                        <span className="hh-attr"><strong>P</strong> {hen.productivity}</span>
+                        <span className="hh-attr"><strong>R</strong> {hen.endurance}</span>
+                        <span className="hh-attr"><strong>F</strong> {hen.strength}</span>
+                        <span className="hh-attr"><strong>E</strong> {hen.stamina}</span>
+                        <span className="hh-attr"><strong>S</strong> {hen.health}</span>
                     </div>
                 </ModalBody>
-                <ModalFooter>
-                    <Button color="primary" type="button" onClick={() => setModalOpen(!modalOpen)}>
+                <ModalFooter style={{borderTop: 'none'}}>
+                    <button className="hh-btn hh-btn-primary" onClick={() => setModalOpen(!modalOpen)}>
                         Confirmar
-                    </Button>
+                    </button>
                 </ModalFooter>
             </Modal>
         </>
