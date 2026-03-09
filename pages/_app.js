@@ -5,6 +5,7 @@ import App from "next/app";
 import "assets/plugins/nucleo/css/nucleo.css";
 import "assets/scss/nextjs-argon-dashboard.scss";
 import "assets/css/global.css";
+import "assets/css/game-theme.css";
 
 export default class MyApp extends App {
     static async getInitialProps({Component, router, ctx}) {

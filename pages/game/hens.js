@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Button, Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
+import {Button, Card, CardBody, CardHeader, Col, Container, Row} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header.js";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -10,35 +10,24 @@ import {useRouter} from "next/router";
 import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json";
 import {henName} from "../../utils/henName";
 
-const Hens = (props) => {
-
+const Hens = () => {
     const router = useRouter();
     const {provider, selectedAccount} = walletState();
     const [items, setItems] = React.useState([]);
 
     const web3 = new Web3(provider);
-
     let nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
 
     useEffect(async () => {
         if (selectedAccount) {
             const data = await nft.methods.getHenByUser(selectedAccount).call();
-
             const items = await Promise.all(data.map(async i => {
-                return await nft.methods.getHenDetail(i).call().then((henDetail) => {
-                    return {
-                        id: i,
-                        level: henDetail.level,
-                        productivity: henDetail.productivity,
-                        endurance: henDetail.endurance,
-                        strength: henDetail.strength,
-                        stamina: henDetail.stamina,
-                        health: henDetail.health,
-                        genetic: henDetail.genetic,
-                    };
-                });
+                const d = await nft.methods.getHenDetail(i).call();
+                return {
+                    id: i, level: d.level, productivity: d.productivity, endurance: d.endurance,
+                    strength: d.strength, stamina: d.stamina, health: d.health, genetic: d.genetic,
+                };
             }));
-
             setItems(items);
         }
     }, []);
@@ -46,59 +35,64 @@ const Hens = (props) => {
     return (
         <>
             <Header/>
-            {/* Page content */}
             <Container className="mt--7" fluid>
-                <Row className="mt-5">
-                    <Col className="mb-5 mb-xl-0" xl="12">
-                        <Card className="shadow">
-                            <CardHeader className="border-0">
-                                <Row className="align-items-center">
-                                    <div className="col">
-                                        <h3 className="mb-0">Minhas galinhas</h3>
-                                    </div>
-                                </Row>
-                            </CardHeader>
-                            <CardBody>
-                                <Row>
-                                    {items.map((hen, i) => <div className="col-md-3">
-                                        <div className="card mb-4 box-shadow">
-                                            <img className="card-img-top" style={{height: '300px', width: '100%', display: 'block'}}
-                                                 src={"/img/hen/" + hen.genetic + ".jpg"}
-                                                 data-holder-rendered="true"
-                                            />
+                <Card className="hh-card">
+                    <CardHeader>
+                        <Row className="align-items-center">
+                            <Col>
+                                <h3>Minhas galinhas</h3>
+                            </Col>
+                            <Col xs="auto">
+                                <span className="hh-badge hh-badge-open">{items.length} galinha(s)</span>
+                            </Col>
+                        </Row>
+                    </CardHeader>
+                    <CardBody>
+                        {items.length === 0 ? (
+                            <div className="hh-empty-state">
+                                <p>Nenhuma galinha encontrada. Abra um ovo para comecar!</p>
+                                <button className="hh-btn hh-btn-primary mt-3" onClick={() => router.push("/game/openEgg")}>
+                                    Abrir ovo
+                                </button>
+                            </div>
+                        ) : (
+                            <Row>
+                                {items.map((hen, i) => (
+                                    <Col md={3} sm={6} key={hen.id} className="mb-4">
+                                        <div className="hh-nft-card">
+                                            <img className="hh-nft-img" src={"/img/hen/" + hen.genetic + ".jpg"} alt={henName(hen.genetic)}/>
                                             <div className="card-body">
-                                                <h3>{henName(hen.genetic)} <small className={"text-muted mt-1 float-right"}> Level {hen.level}</small></h3>
-                                                <div className="d-flex justify-content-between align-items-center mt-3 mb-3">
-                                                    <span className={"mr-2"}><strong>P /</strong> {hen.productivity}</span>
-                                                    <span className={"mr-2"}><strong>R /</strong> {hen.endurance}</span>
-                                                    <span className={"mr-2"}><strong>F /</strong> {hen.strength}</span>
-                                                    <span className={"mr-2"}><strong>E /</strong> {hen.stamina}</span>
-                                                    <span className={"mr-2"}><strong>S /</strong> {hen.health}</span>
+                                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                                    <span className="hh-nft-name">{henName(hen.genetic)}</span>
+                                                    <span className="hh-nft-level">Lv {hen.level}</span>
                                                 </div>
-                                                <div className="d-flex justify-content-between align-items-center">
-                                                    <div className="btn-group">
-                                                        <Button onClick={() => {
-                                                            router.push({
-                                                                pathname: '/game/hen/train/[id]',
-                                                                query: {id: hen.id},
-                                                            })
-                                                        }}><FontAwesomeIcon icon={faArrowUp}/> TREINAR</Button>
-                                                        <Button onClick={() => {
-                                                            router.push({
-                                                                pathname: '/game/market/sell/[id]',
-                                                                query: {id: hen.id},
-                                                            })
-                                                        }}><FontAwesomeIcon icon={faDollarSign}/> VENDER</Button>
-                                                    </div>
+                                                <div className="hh-attr-row">
+                                                    <span className="hh-attr"><strong>P</strong> {hen.productivity}</span>
+                                                    <span className="hh-attr"><strong>R</strong> {hen.endurance}</span>
+                                                    <span className="hh-attr"><strong>F</strong> {hen.strength}</span>
+                                                    <span className="hh-attr"><strong>E</strong> {hen.stamina}</span>
+                                                    <span className="hh-attr"><strong>S</strong> {hen.health}</span>
+                                                </div>
+                                                <div className="d-flex mt-3" style={{gap: '8px'}}>
+                                                    <button className="hh-btn hh-btn-primary flex-fill" onClick={() => {
+                                                        router.push({pathname: '/game/hen/train/[id]', query: {id: hen.id}});
+                                                    }}>
+                                                        <FontAwesomeIcon icon={faArrowUp}/> Treinar
+                                                    </button>
+                                                    <button className="hh-btn hh-btn-outline flex-fill" onClick={() => {
+                                                        router.push({pathname: '/game/market/sell/[id]', query: {id: hen.id}});
+                                                    }}>
+                                                        <FontAwesomeIcon icon={faDollarSign}/> Vender
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>)}
-                                </Row>
-                            </CardBody>
-                        </Card>
-                    </Col>
-                </Row>
+                                    </Col>
+                                ))}
+                            </Row>
+                        )}
+                    </CardBody>
+                </Card>
             </Container>
         </>
     );

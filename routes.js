@@ -1,4 +1,4 @@
-import {faEgg, faCrow, faTv, faWarehouse, faSkullCrossbones, faSuitcase, faHandHoldingUsd, faQuestion} from '@fortawesome/free-solid-svg-icons'
+import {faEgg, faCrow, faTv, faWarehouse, faSkullCrossbones, faSuitcase, faHandHoldingUsd, faQuestion, faTrophy, faHeart, faGift, faBed, faFistRaised} from '@fortawesome/free-solid-svg-icons'
 
 const routes = [
     {
@@ -27,14 +27,44 @@ const routes = [
     },
     {
         path: "/pve",
-        name: "Rinhas",
+        name: "Rinhas (PvE)",
         icon: faSkullCrossbones,
+        layout: "/game",
+    },
+    {
+        path: "/pvp",
+        name: "Arena PvP",
+        icon: faFistRaised,
         layout: "/game",
     },
     {
         path: "/inventory",
         name: "Inventário",
         icon: faSuitcase,
+        layout: "/game",
+    },
+    {
+        path: "/leaderboard",
+        name: "Ranking",
+        icon: faTrophy,
+        layout: "/game",
+    },
+    {
+        path: "/breeding",
+        name: "Cruzamento",
+        icon: faHeart,
+        layout: "/game",
+    },
+    {
+        path: "/dailyRewards",
+        name: "Recompensa Diária",
+        icon: faGift,
+        layout: "/game",
+    },
+    {
+        path: "/retirement",
+        name: "Aposentadoria",
+        icon: faBed,
         layout: "/game",
     },
     {
