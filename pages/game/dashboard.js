@@ -1,85 +1,164 @@
-import React from "react";
-import {Card, CardBody, CardHeader, Col, Container, Row,} from "reactstrap";
+import React, {useEffect} from "react";
+import {Card, CardBody, Col, Container, Row} from "reactstrap";
 import Game from "layouts/Game";
 import Header from "components/Headers/Header";
+import {walletState} from "../../states/walletState";
+import Web3 from "web3";
+import nftJson from "../../artifacts/contracts/HenNFT.sol/HenNFT.json";
+import eggJson from "../../artifacts/contracts/EggToken.sol/EggToken.json";
+import tokenJson from "../../artifacts/contracts/HenToken.sol/HenToken.json";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCrow, faEgg, faCoins, faSkullCrossbones, faWarehouse, faFistRaised} from "@fortawesome/free-solid-svg-icons";
+import {useRouter} from "next/router";
 
-const Dashboard = (props) => {
+const Dashboard = () => {
+    const router = useRouter();
+    const {provider, selectedAccount} = walletState();
+    const [henCount, setHenCount] = React.useState(0);
+    const [eggBalance, setEggBalance] = React.useState("0");
+    const [henBalance, setHenBalance] = React.useState("0");
+    const [loaded, setLoaded] = React.useState(false);
+
+    useEffect(async () => {
+        if (selectedAccount && provider) {
+            try {
+                const web3 = new Web3(provider);
+                const nft = new web3.eth.Contract(nftJson.abi, process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS);
+                const egg = new web3.eth.Contract(eggJson.abi, process.env.NEXT_PUBLIC_EGG_CONTRACT_ADDRESS);
+                const token = new web3.eth.Contract(tokenJson.abi, process.env.NEXT_PUBLIC_HEN_CONTRACT_ADDRESS);
+
+                const myHens = await nft.methods.getHenByUser(selectedAccount).call();
+                setHenCount(myHens.length);
+
+                const eggBal = await egg.methods.balanceOf(selectedAccount).call();
+                setEggBalance(web3.utils.fromWei(eggBal, "ether"));
+
+                const henBal = await token.methods.balanceOf(selectedAccount).call();
+                setHenBalance(web3.utils.fromWei(henBal, "ether"));
+            } catch (e) {
+                console.error(e);
+            }
+            setLoaded(true);
+        }
+    }, []);
+
+    const stats = [
+        { label: "Galinhas", value: henCount, icon: faCrow, iconClass: "icon-primary" },
+        { label: "Saldo EGG", value: parseFloat(eggBalance).toFixed(1), icon: faEgg, iconClass: "icon-success" },
+        { label: "Saldo HEN", value: parseFloat(henBalance).toFixed(1), icon: faCoins, iconClass: "icon-info" },
+    ];
+
+    const features = [
+        {
+            title: "Abrir Ovo",
+            desc: "Quebre um ovo e receba uma galinha com atributos aleatórios. Pode ser preta, branca ou caipira!",
+            img: "/img/breakegg.jpg",
+            href: "/game/openEgg",
+            btnText: "Quebrar ovo",
+        },
+        {
+            title: "Galinheiros",
+            desc: "Coloque suas galinhas para trabalhar e colete ovos diariamente. Atenção: ovos apodrecem em 15 dias!",
+            img: "/img/heninnest.jpg",
+            href: "/game/houses",
+            btnText: "Ver galinheiros",
+        },
+        {
+            title: "Arena PvP",
+            desc: "Desafie outros jogadores em batalhas de aposta. Aposte EGG, escolha sua galinha e lute pela vitoria!",
+            img: "/img/fight2.jpg",
+            href: "/game/pvp",
+            btnText: "Entrar na arena",
+        },
+    ];
+
     return (
         <>
             <Header/>
             <Container className="mt--7" fluid>
-                <Row className="mt-5">
-                    <Col className="mb-5 mb-xl-0" xl="12">
-                        <Card className="shadow">
-                            <CardHeader className="border-0">
-                                <Row className="align-items-center">
-                                    <div className="col">
-                                        <h3 className="mb-0">Galinheiro crypto game</h3>
-                                    </div>
-                                </Row>
-                            </CardHeader>
-                            <CardBody>
-                                <Row>
-                                    <div className="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-                                        <div className="col-md-8 p-lg-5 mx-auto my-5">
-                                            <h1 className="display-4 font-weight-normal">Galinheiro game</h1>
-                                            <p className="lead font-weight-normal">
-                                                Desfrute do nosso sistema econômico de token duplo, explore as arenas para
-                                                rinhas de galo e ganhe uma renda diária com suas galinhas botando ovos.
-                                            </p>
-                                            <p className="lead font-weight-normal">
-                                                Todos os personagens e itens são NFTs.
-                                            </p>
-                                            <p className="lead font-weight-normal">
-                                                Recrute sua galinha agora e comece essa jornada épica sobre galinhas no metaverso!
-                                            </p>
-                                            <a className="btn btn-primary" href="#">Comece agora</a>
-                                        </div>
-                                    </div>
-                                </Row>
+                {/* Hero */}
+                <div className="hh-hero hh-animate-in">
+                    <Row className="align-items-center">
+                        <Col md={7}>
+                            <h1>Bem-vindo ao <span className="hh-hero-accent">Hen House</span></h1>
+                            <p>
+                                Explore o metaverso das galinhas! Colete, treine e batalhe com suas galinhas NFT.
+                                Ganhe EGG diariamente nos galinheiros, enfrente outros jogadores na arena PvP
+                                e domine o ranking.
+                            </p>
+                            <button className="hh-btn hh-btn-primary mt-2" onClick={() => router.push("/game/openEgg")}>
+                                Comece agora
+                            </button>
+                        </Col>
+                        <Col md={5} className="text-center d-none d-md-block">
+                            <img src="/img/hens.jpg" alt="hens" style={{maxHeight: '220px', borderRadius: '12px', opacity: 0.9}} />
+                        </Col>
+                    </Row>
+                </div>
 
-                                <Row>
-                                    <div className="col-md-7">
-                                        <img src="/img/eggnest2.jpg" alt="eggnest2" width={"100%"}/>
-                                    </div>
-                                    <div className="col-md-5 pt-7">
-                                        <h1>Quebre ovos e comece a jogar</h1>
-                                        <p>Quebre um ovo e receba uma galinha aleatória. Você poderá receber galinhas
-                                            caipiras, pretas ou de granja e os atributos de força, peso, velocidade,
-                                            energia também serão surpresa. </p>
-                                        <a className="btn btn-primary" href="#"><i className="fas fa-egg"/> Quebrar ovo</a>
-                                    </div>
-                                </Row>
+                {/* Stats */}
+                {loaded && (
+                    <Row className="mb-4">
+                        {stats.map((s, i) => (
+                            <Col md={4} key={i} className="mb-3">
+                                <Card className="hh-stat-card">
+                                    <CardBody>
+                                        <Row className="align-items-center">
+                                            <Col xs="auto">
+                                                <div className={"hh-stat-icon " + s.iconClass}>
+                                                    <FontAwesomeIcon icon={s.icon}/>
+                                                </div>
+                                            </Col>
+                                            <Col>
+                                                <div className="hh-stat-label">{s.label}</div>
+                                                <div className="hh-stat-value">{s.value}</div>
+                                            </Col>
+                                        </Row>
+                                    </CardBody>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                )}
 
-                                <Row>
-                                    <div className="col-md-5 pt-7">
-                                        <h1>Colete ovos no galinheiro</h1>
-                                        <p>Após colocar suas galinhas para trabalhar, você receberá ovos diariamente.
-                                            Alguns ninhos são específicos para cada tipo de galinha e as recompensas
-                                            podem variar. Essa tarefa precisa de atenção, se você não coletar os ovos,
-                                            em 15 dias eles começam apodrecer e seu rendimento cairá para apenas 80%
-                                            da produção diária</p>
-                                        <a className="btn btn-primary" href="#"><i className="fas fa-warehouse"/> Ver galinheiros</a>
-                                    </div>
-                                    <div className="col-md-7">
-                                        <img src="/img/heninnest.jpg" alt="heninnest" width={"100%"}/>
-                                    </div>
-                                </Row>
+                {/* Features */}
+                <h3 className="hh-section-title">Como jogar</h3>
+                <Row className="mb-5">
+                    {features.map((f, i) => (
+                        <Col md={4} key={i} className="mb-4">
+                            <div className="hh-feature">
+                                <img src={f.img} alt={f.title} className="hh-feature-img"/>
+                                <div className="hh-feature-body">
+                                    <h4>{f.title}</h4>
+                                    <p>{f.desc}</p>
+                                    <button className="hh-btn hh-btn-primary" onClick={() => router.push(f.href)}>
+                                        {f.btnText}
+                                    </button>
+                                </div>
+                            </div>
+                        </Col>
+                    ))}
+                </Row>
 
-                                <Row>
-                                    <div className="col-md-7">
-                                        <img src="/img/fight2.jpg" alt="heninnest" width={"100%"}/>
+                {/* Quick Links */}
+                <Row className="mb-5">
+                    {[
+                        { icon: faWarehouse, label: "Galinheiros", href: "/game/houses", color: "icon-success" },
+                        { icon: faSkullCrossbones, label: "Rinhas PvE", href: "/game/pve", color: "icon-danger" },
+                        { icon: faFistRaised, label: "Arena PvP", href: "/game/pvp", color: "icon-purple" },
+                        { icon: faCrow, label: "Minhas Galinhas", href: "/game/hens", color: "icon-info" },
+                    ].map((link, i) => (
+                        <Col xs={6} md={3} key={i} className="mb-3">
+                            <Card className="hh-stat-card text-center" style={{cursor: 'pointer'}} onClick={() => router.push(link.href)}>
+                                <CardBody className="py-4">
+                                    <div className={"hh-stat-icon mx-auto mb-3 " + link.color}>
+                                        <FontAwesomeIcon icon={link.icon}/>
                                     </div>
-                                    <div className="col-md-5 pt-7">
-                                        <h1>Vença batalhas na nossa arena PvP</h1>
-                                        <p>Participe de nossa rinha de galos. Enfrente batalhas mortais para
-                                            ganhar ovos e novos tokens. Cuidado para seu galo não morrer</p>
-                                        <a className="btn btn-primary" href="#"><i className="fas fa-skull-crossbones"/> Visitar rinhas</a>
-                                    </div>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                    </Col>
+                                    <div className="hh-stat-label">{link.label}</div>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    ))}
                 </Row>
             </Container>
         </>
